@@ -34,6 +34,9 @@ public:
 	void SetView(int view) {}; // 몬스터 시선 설정
 	void SetRect(RECT rect) {}; // 그리기용 좌표
 
+	// 업데이트 함수
+	void Update();
+
 	// 이동함수
 	void MoveToPlayer(int x, int y, int Mspeed, int view, POINT player1) {}; // 플레이어 위치 이동 함수
 	void MoveToMachine(int x, int y, int Mspeed, int view, POINT buliding) {}; // 기물 위치 근처 이동 함수
@@ -45,6 +48,5 @@ public:
 	// 부가요소 함수
 	void Update(float deltaTime) {}; // 위치 업데이트
 	void Draw(HDC hDC) {}; // 그리기
-
 };
 
