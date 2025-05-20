@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>	
 #include "PLAYER1.h"
-
+//fsdfsdfsdf
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
