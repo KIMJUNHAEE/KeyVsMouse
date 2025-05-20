@@ -63,7 +63,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		PLAYER1::SetSpot(500, 500);
 
-
+		// Å×½ºÆ®
 
 
 		break;
