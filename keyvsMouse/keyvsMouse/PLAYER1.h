@@ -26,7 +26,7 @@ private:
 	HBITMAP BitMap[5]; 
 
 public:
-	PLAYER1(int nhp, int nx, int ny, int nMspeed, int nAspeed, int nrange, int nsize, int nAct, int nview, RECT nrect); // 생성자
+	PLAYER1(int nhp, int nx, int ny, int nMspeed, int nAspeed, int nrange, int nsize, int nAct, int nview); // 생성자
 	~PLAYER1(); // 소멸자
 
 	// 값 변경 함수

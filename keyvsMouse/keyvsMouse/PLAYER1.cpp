@@ -1,6 +1,6 @@
 #include "PLAYER1.h"
 
-PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, int nAspeed, int nrange, int nsize, int nAct, int nview, RECT nrect) {
+PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, int nAspeed, int nrange, int nsize, int nAct, int nview) {
 	hp = nhp;
 	x = nx;
 	y = ny;
@@ -10,7 +10,6 @@ PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, int nAspeed, int nrange, 
 	size = nsize;
 	Act = nAct;
 	view = nview;
-
 
 };// »ý¼ºÀÚ
 

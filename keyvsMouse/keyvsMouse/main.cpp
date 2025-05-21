@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>	
 #include "PLAYER1.h"
-//fsdfsdfsdf
+
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -58,7 +58,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	switch (iMessage) {
 
 	case WM_CREATE:
-		PlAYER1::PLAYER1()
+		PLAYER1(10,500,500,10,10,10,0,0,down);
 
 
 		PLAYER1::SetSpot(500, 500);
