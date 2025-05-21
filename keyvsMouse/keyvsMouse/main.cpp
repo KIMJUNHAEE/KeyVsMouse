@@ -54,14 +54,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static RECT ViewRect;
 	static HPEN hPen, hOldPen;
 	static HBRUSH hBrush, hOldBrush;
+	static PLAYER1 player(10, 500, 500, 10, 10, 10, 0, 0, down);
 
 	switch (iMessage) {
 
 	case WM_CREATE:
-		PLAYER1(10,500,500,10,10,10,0,0,down);
+		
+		
 
-
-		PLAYER1::SetSpot(500, 500);
+	
 
 		
 
