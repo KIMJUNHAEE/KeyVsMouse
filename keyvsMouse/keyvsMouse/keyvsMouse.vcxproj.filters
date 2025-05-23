@@ -30,6 +30,9 @@
     <ClCompile Include="SHOP.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="DRAW.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PLAYER1.h">
@@ -42,6 +45,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="SHOP.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DRAW.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

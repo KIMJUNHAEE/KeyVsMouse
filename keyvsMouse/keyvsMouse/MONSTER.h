@@ -29,6 +29,7 @@ public:
 
 	// 값 변경 함수
 	void SetSpot(int nx, int ny); // 좌표 설정
+
 	void SetHp(int nhp); // 체력 설정
 	void SetPower(int npower); // 공격력 설정
 	void SetMspeed(int nMspeed); // 이동속도 설정
@@ -36,6 +37,7 @@ public:
 	void SetSize(int nsize); // 몬스터 크기 설정
 	void SetDropItem(int nDropItem); // 드랍되는 아이템 시드값 설정
 	void SetView(int nview); // 몬스터 시선 설정
+	void SetRect(int x1, int y1, int x2, int y2); // 그리기용 좌표
 	void SetRect(RECT nrect); // 그리기용 좌표
 
 	// 이동함수
