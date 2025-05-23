@@ -2,8 +2,9 @@
 #include <tchar.h>
 #include <stdlib.h>
 #include <time.h>	
-#include "PLAYER1.h"
+#include <vector>
 
+#include "MONSTER.h"
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -54,25 +55,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static RECT ViewRect;
 	static HPEN hPen, hOldPen;
 	static HBRUSH hBrush, hOldBrush;
-	static PLAYER1 player(10, 500, 500, 10, 10, 10, 0, 0, down);
+
+	static POINT cursor; // 마우스 커서 좌표
+	static float deltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
+	
+	static std::vector<MONSTER> monsters; // 몬스터 벡터 선언
 
 	switch (iMessage) {
 
 	case WM_CREATE:
-		
-		
-
-	
-
-		
-
-
+		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
 		break;
-
 	case WM_PAINT:
-		
+		hDC = BeginPaint(hWnd, &ps);
+		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
+			monster.Draw(hDC);
+		}
 		break;
-
 	case WM_CHAR:
 
 		
@@ -80,17 +79,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 	case WM_TIMER:
 		
+		InvalidateRect(hWnd, NULL, true);
 		break;
 	case WM_KEYDOWN:
 
 		break;
 	case WM_LBUTTONDOWN:
-
+		monsters.push_back({ 1,cursor.x,cursor.y }); // 몬스터 생성
 		break;
 	case WM_MOUSEMOVE:
+		cursor.x = LOWORD(lParam);
+		cursor.y = HIWORD(lParam);
 		
 		break;
 	case WM_DESTROY:
+		KillTimer(hWnd, 1); // 타이머 제거
 		PostQuitMessage(0);
 		break;
 	}

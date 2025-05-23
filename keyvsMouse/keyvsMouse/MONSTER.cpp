@@ -1,18 +1,38 @@
 #include "MONSTER.h"
 
+enum DIRECTION {
+	left = 0, right = 1, up = 2, down = 3
+};
 
-MONSTER::MONSTER(int nhp, int npower, int nx, int ny, int nMspeed, int nAspeed, int nrange, int nsize, int nDropItem)
+MONSTER::MONSTER() // 디폴트 몬스터 생성자
 {
-	hp = nhp;
-	power = npower;
+	type = 0;
+	x = 0, y = 0;
+	hp = 100, power = 10, Mspeed = 10, Aspeed = 1.0f, range = 50;
+	size = 10, DropItem = 0;
+	view = down;
+	DeltaTime = 0.0f;
+	rect = { 0,0,0,0 };
+}
+
+MONSTER::MONSTER(int ntype, int nx, int ny) // 몬스터 생성자 (시드, 좌표)
+{
+	type = ntype;
 	x = nx, y = ny;
-	Mspeed = nMspeed;
-	Aspeed = nAspeed;
-	range = nrange;
-	size = nsize;
-	DropItem = nDropItem;
 	view = down;
 	DeltaTime = 0;
+
+	switch (type) {
+	case 1:
+		hp = 200;
+		power = 10;
+		Mspeed = 10;
+		Aspeed = 1.0f;
+		range = 50;
+		size = 20;
+		DropItem = 1;
+		break;
+	}
 
 	rect.left = x - size;
 	rect.top = y - size;
@@ -20,52 +40,53 @@ MONSTER::MONSTER(int nhp, int npower, int nx, int ny, int nMspeed, int nAspeed, 
 	rect.bottom = y + size;
 }
 
-MONSTER::~MONSTER()
+MONSTER::~MONSTER() // 몬스터 소멸자
 {
+
 }
 
-void MONSTER::SetSpot(int nx, int ny)
+void MONSTER::SetSpot(int nx, int ny) // 좌표 설정
 {
 	x = nx;
 	y = ny;
 }
 
-void MONSTER::SetHp(int nhp)
+void MONSTER::SetHp(int nhp) // 체력 설정
 {
 	hp = nhp;
 }
 
-void MONSTER::SetPower(int npower)
+void MONSTER::SetPower(int npower) // 공격력 설정
 {
 	power = npower;
 }
 
-void MONSTER::SetMspeed(int nMspeed)
+void MONSTER::SetMspeed(int nMspeed) // 이동속도 설정
 {
 	Mspeed = nMspeed;
 }
 
-void MONSTER::SetAspeed(int nAspeed)
+void MONSTER::SetAspeed(int nAspeed) // 공격속도 설정
 {
 	Aspeed = nAspeed;
 }
 
-void MONSTER::SetSize(int nsize)
+void MONSTER::SetSize(int nsize) // 크기 설정
 {
 	size = nsize;
 }
 
-void MONSTER::SetDropItem(int nDropItem)
+void MONSTER::SetDropItem(int nDropItem) // 드랍 아이템 시드값 설정
 {
 	DropItem = nDropItem;
 }
 
-void MONSTER::SetView(int nview)
+void MONSTER::SetView(int nview) // 시점 설정
 {
 	view = nview;
 }
 
-void MONSTER::SetRect(int x1, int y1, int x2, int y2)
+void MONSTER::SetRect(int x1, int y1, int x2, int y2) // 그리기 및 충돌처리 좌표 설정 (int)
 {
 	rect.left = x1 - size;
 	rect.top = y1 - size;
@@ -73,7 +94,7 @@ void MONSTER::SetRect(int x1, int y1, int x2, int y2)
 	rect.bottom = y1 + size;
 }
 
-void MONSTER::SetRect(RECT nrect)
+void MONSTER::SetRect(RECT nrect) // 그리기 및 충돌처리 좌표 설정 (rect)
 {
 	rect.left = nrect.left;
 	rect.top = nrect.top;
@@ -81,33 +102,29 @@ void MONSTER::SetRect(RECT nrect)
 	rect.bottom = nrect.bottom;
 }
 
-void MONSTER::MoveToPlayer(POINT player1)
+void MONSTER::MoveToPlayer(POINT player1) // 플레이어의 좌표를 받아 이동하는 함수
 {
 
 }
 
-void MONSTER::MoveToMachine(POINT buliding)
+void MONSTER::MoveToMachine(POINT buliding) // 기물의 좌표를 받아 이동하는 함수
 {
 }
 
-void MONSTER::Hit(int power)
+void MONSTER::Hit(int power) // 피격 함수
 {
 	hp -= power;
 }
 
-void MONSTER::Death()
+void MONSTER::Death() // 사망 함수
 {
 }
 
-void MONSTER::Update()
+void MONSTER::Update() // 내부타이머 함수
 {
 }
 
-void MONSTER::Draw(HDC hDC)
+void MONSTER::Draw(HDC hDC) // 그리기 함수
 {
-	HPEN hPen, OldPen;
-	HBRUSH hBrush, OldBrush;
-
-
-
+	Rectangle(hDC, rect.left, rect.top, rect.right, rect.bottom);
 }
