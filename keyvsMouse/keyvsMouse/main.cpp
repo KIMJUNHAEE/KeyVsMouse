@@ -4,7 +4,8 @@
 #include <time.h>	
 #include "PLAYER1.h"
 
-
+int MoveCheck = 0;
+int MoveCount = 0;
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"Key Vs Mouse";
@@ -49,46 +50,125 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hDC, hMem1DC, hMem2DC;
-	HBITMAP hBitmap;
+	static HBITMAP BackGroundhBitmap;
+	HBITMAP BGoldBitmap;
 
 	static RECT ViewRect;
 	static HPEN hPen, hOldPen;
 	static HBRUSH hBrush, hOldBrush;
-	static PLAYER1 player(10, 500, 500, 10, 10, 10, 0, 0, down);
+	static PLAYER1 player(10, 500, 500, 10, 10, 10, 2, 0, down); // 
 
 	switch (iMessage) {
 
 	case WM_CREATE:
-		
-		
 
-	
+		player.SetHeadRect();
+		player.SetBodyRect();
+		player.SetCamera();
 
-		
-
+		TCHAR BGfilepath[256];
+		_stprintf_s(BGfilepath, _T("Play_graphics/background.bmp")); // ¿¹½Ã: "resources/player0.bmp", "resources/player1.bmp" µî
+		BackGroundhBitmap = (HBITMAP)LoadImage(NULL, BGfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		if (BackGroundhBitmap == NULL) {
+			MessageBox(hWnd, _T("Failed to load background image"), _T("Error"), MB_OK | MB_ICONERROR);
+			return -1;
+		}
 
 		break;
 
 	case WM_PAINT:
+		hDC = BeginPaint(hWnd, &ps);
+		hMem1DC = CreateCompatibleDC(hDC);
+
+		BGoldBitmap = (HBITMAP)SelectObject(hMem1DC, BackGroundhBitmap);
+		Ellipse(hDC, 500, 500, 600, 600);
+
+		if (MoveCheck == 0) {
+			player.Draw(hDC, hMem1DC);	
+		}
+		else if(MoveCheck == 1) {
+			player.UMDraw(hDC, hMem1DC, MoveCount);
+		}
+		else if (MoveCheck == 2) {
+			player.DMDraw(hDC, hMem1DC, MoveCount);
+		}
+		else if (MoveCheck == 3) {
+			player.LMDraw(hDC, hMem1DC, MoveCount);
+		}
+		else if(MoveCheck == 4) {
+			player.RMDraw(hDC, hMem1DC, MoveCount);
+		}
 		
+		DeleteDC(hMem1DC);
+		EndPaint(hWnd, &ps);
 		break;
 
 	case WM_CHAR:
-
-		
 		break;
 
 	case WM_TIMER:
 		
 		break;
-	case WM_KEYDOWN:
 
+	case WM_KEYDOWN:
+		if (wParam == 'W') {
+			player.MoveUp();
+			MoveCheck = 1;
+			InvalidateRect(hWnd, NULL, FALSE);
+			MoveCount++;
+			if (MoveCount >= 9) MoveCount = 0;
+		}
+		else if (wParam == 'S') {
+			player.MoveDown();
+			MoveCheck = 2;
+			InvalidateRect(hWnd, NULL, FALSE);
+			MoveCount++;
+			if (MoveCount >= 9) MoveCount = 0;
+		}else if(wParam == 'A') {
+			player.MoveLeft();
+			MoveCheck = 3;
+			InvalidateRect(hWnd, NULL, FALSE);
+			MoveCount++;
+			if (MoveCount >= 9) MoveCount = 0;
+		}
+		else if (wParam == 'D') {
+			player.MoveRight();
+			MoveCheck = 4;
+			InvalidateRect(hWnd, NULL, FALSE);
+			MoveCount++;
+			if (MoveCount >= 9) MoveCount = 0;
+		}
+		InvalidateRect(hWnd, NULL, FALSE);
 		break;
+	case WM_KEYUP:
+		if(wParam == 'W') {
+			MoveCheck = 0;
+			InvalidateRect(hWnd, NULL, FALSE);
+			MoveCount = 0;
+		}
+		else if (wParam == 'S') {
+			MoveCheck = 0;
+			InvalidateRect(hWnd, NULL, FALSE);
+			MoveCount = 0;
+		}
+		else if(wParam == 'A') {
+			MoveCheck = 0;
+			InvalidateRect(hWnd, NULL, FALSE);
+			MoveCount = 0;
+		}
+		else if(wParam == 'D') {
+			MoveCheck = 0;
+			InvalidateRect(hWnd, NULL, FALSE);
+			MoveCount = 0;
+		}
+		InvalidateRect(hWnd, NULL, FALSE);
+		break;
+
 	case WM_LBUTTONDOWN:
 
 		break;
 	case WM_MOUSEMOVE:
-		
+
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -96,3 +176,4 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	}
 	return (DefWindowProc(hWnd, iMessage, wParam, lParam));
 }
+	

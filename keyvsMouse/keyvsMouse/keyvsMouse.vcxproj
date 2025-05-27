@@ -108,6 +108,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalOptions>msimg32.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,7 +138,19 @@
     <ClInclude Include="MONSTER.h" />
     <ClInclude Include="OBJECT.h" />
     <ClInclude Include="PLAYER1.h" />
+    <ClInclude Include="P1RESOURCE.h" />
     <ClInclude Include="SHOP.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="PLAYER1.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="P1_graphics\P1_1.bmp" />
+    <Image Include="P1_graphics\P1_2.bmp" />
+    <Image Include="P1_graphics\P1_3.bmp" />
+    <Image Include="P1_graphics\P1_4.bmp" />
+    <Image Include="P1_graphics\P1_5.bmp" />
+    <Image Include="P1_graphics\P1_6.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
