@@ -1,6 +1,7 @@
 #pragma once
 #include <windows.h>
-#include <stdlib.h>
+#include <iostream>
+#include <cmath>
 
 class MONSTER
 {
@@ -15,7 +16,7 @@ private:
 	int size; // 몬스터 크기
 	int DropItem; // 드랍되는 아이템 시드값
 	int view; // 시선
-	float DeltaTime; // 내부 타이머
+	float InTimer; // 내부 타이머
 
 	RECT rect; // 그리기용 좌표
 
@@ -39,7 +40,7 @@ public:
 	void SetRect(RECT nrect); // 그리기용 좌표
 
 	// 이동함수
-	void MoveToPlayer(POINT player1); // 플레이어 위치 이동 함수
+	void MoveToPlayer(POINT player1, float DeltaTime); // 플레이어 위치 이동 함수
 	void MoveToMachine(POINT buliding); // 기물 위치 근처 이동 함수
 
 	// 행동함수
