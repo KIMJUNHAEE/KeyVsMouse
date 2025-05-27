@@ -24,13 +24,12 @@ MONSTER::MONSTER(int ntype, int nx, int ny) // 몬스터 생성자 (시드, 좌표)
 
 	switch (type) {
 	case 1:
-		hp = 200;
-		power = 10;
-		Mspeed = 10;
-		Aspeed = 1.0f;
-		range = 50;
-		size = 20;
-		DropItem = 1;
+		hp = 200, power = 10, Mspeed = 10, Aspeed = 1.0f, range = 50;
+		size = 20, DropItem = 1;
+		break;
+	default:
+		hp = 100, power = 10, Mspeed = 10, Aspeed = 1.0f, range = 50;
+		size = 10, DropItem = 0;
 		break;
 	}
 
@@ -102,9 +101,25 @@ void MONSTER::SetRect(RECT nrect) // 그리기 및 충돌처리 좌표 설정 (rect)
 	rect.bottom = nrect.bottom;
 }
 
-void MONSTER::MoveToPlayer(POINT player1) // 플레이어의 좌표를 받아 이동하는 함수
+void MONSTER::MoveToPlayer(POINT player1, float DeltaTime) // 플레이어의 좌표를 받아 이동하는 함수
 {
+	int dx, dy;
+	float distance;
+	float step;
+	float MoveX, MoveY;
 
+	dx = player1.x - x;
+	dy = player1.y - y;
+	distance = sqrt(dx * dx + dy * dy); // 플레이어와의 거리
+
+	// 플레이어가 충분히 멀리 있을 때 이동
+	if (distance >= 5.0f) { // 5거리 이상일때
+		step = Mspeed * DeltaTime;
+		MoveX = (dx / distance) * step;
+		MoveY = (dy / distance) * step;
+		x += MoveX;
+		y += MoveY;
+	}
 }
 
 void MONSTER::MoveToMachine(POINT buliding) // 기물의 좌표를 받아 이동하는 함수
