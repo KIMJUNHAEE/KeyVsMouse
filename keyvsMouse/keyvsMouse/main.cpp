@@ -4,12 +4,10 @@
 #include <time.h>	
 #include <vector>
 #include "PLAYER1.h"
-
-int MoveCheck = 0;
-int MoveCount = 0;
-
 #include "MONSTER.h"
 
+int MoveCheck = 0; // 0: 정지, 1: 위, 2: 아래, 3: 왼쪽, 4: 오른쪽
+int MoveCount = 0; // 움직임 카운트 (애니메이션 프레임을 위한 카운트)
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -61,7 +59,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static RECT ViewRect;
 	static HPEN hPen, hOldPen;
 	static HBRUSH hBrush, hOldBrush;
-	static PLAYER1 player(10, 500, 500, 10, 10, 10, 2, 0, down); // 
+	static PLAYER1 player(10, 500, 500, 5, 10, 10, 2, 0, down); // 생성자
 
 	static POINT cursor; // 마우스 커서 좌표
 	static float deltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
@@ -91,7 +89,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hMem1DC = CreateCompatibleDC(hDC);
 
 		BGoldBitmap = (HBITMAP)SelectObject(hMem1DC, BackGroundhBitmap);
-		Ellipse(hDC, 500, 500, 600, 600);
+		
 
 		if (MoveCheck == 0) {
 			player.Draw(hDC, hMem1DC);	

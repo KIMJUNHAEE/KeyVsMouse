@@ -11,7 +11,7 @@ MONSTER::MONSTER() // 디폴트 몬스터 생성자
 	hp = 100, power = 10, Mspeed = 10, Aspeed = 1.0f, range = 50;
 	size = 10, DropItem = 0;
 	view = down;
-	DeltaTime = 0.0f;
+	//DeltaTime = 0.0f;
 	rect = { 0,0,0,0 };
 }
 
@@ -20,7 +20,7 @@ MONSTER::MONSTER(int ntype, int nx, int ny) // 몬스터 생성자 (시드, 좌표)
 	type = ntype;
 	x = nx, y = ny;
 	view = down;
-	DeltaTime = 0;
+	//DeltaTime = 0;
 
 	switch (type) {
 	case 1:
