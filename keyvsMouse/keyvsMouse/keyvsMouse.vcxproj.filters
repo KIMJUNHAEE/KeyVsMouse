@@ -1,85 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="소스 파일">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="헤더 파일">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <ClCompile Include="DRAW.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MONSTER.cpp" />
+    <ClCompile Include="OBJECT.cpp" />
+    <ClCompile Include="PLAYER1.cpp" />
+    <ClCompile Include="SHOP.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="PLAYER1.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="MONSTER.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="OBJECT.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="SHOP.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="DRAW.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
+    <ClInclude Include="DRAW.h" />
+    <ClInclude Include="MONSTER.h" />
+    <ClInclude Include="OBJECT.h" />
+    <ClInclude Include="PLAYER1.h" />
+    <ClInclude Include="P1RESOURCE.h" />
+    <ClInclude Include="SHOP.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PLAYER1.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="MONSTER.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="OBJECT.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="SHOP.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-<<<<<<< HEAD
-    <ClInclude Include="P1RESOURCE.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
+    <ResourceCompile Include="PLAYER1.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="PLAYER1.rc">
-      <Filter>리소스 파일</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="P1_graphics\P1_1.bmp">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="P1_graphics\P1_2.bmp">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="P1_graphics\P1_3.bmp">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="P1_graphics\P1_4.bmp">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="P1_graphics\P1_5.bmp">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="P1_graphics\P1_6.bmp">
-      <Filter>리소스 파일</Filter>
-    </Image>
-=======
-    <ClInclude Include="DRAW.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
->>>>>>> fdbc007ff412eff480fae79ff3df3eb202e8648a
+    <Image Include="P1_graphics\P1_1.bmp" />
+    <Image Include="P1_graphics\P1_2.bmp" />
+    <Image Include="P1_graphics\P1_3.bmp" />
+    <Image Include="P1_graphics\P1_4.bmp" />
+    <Image Include="P1_graphics\P1_5.bmp" />
+    <Image Include="P1_graphics\P1_6.bmp" />
+    <Image Include="monster_01_fly.png" />
   </ItemGroup>
 </Project>

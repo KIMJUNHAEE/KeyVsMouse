@@ -6,37 +6,18 @@ enum DIRECTION {
 
 MONSTER::MONSTER() // 디폴트 몬스터 생성자
 {
-	type = 0;
 	x = 0, y = 0;
-	hp = 100, power = 10, Mspeed = 10, Aspeed = 1.0f, range = 50;
-	size = 10, DropItem = 0;
+	type = 0;
+	Xsize = 0, Ysize = 0;
+	hp = 0, power = 0, Mspeed = 0, Aspeed = 0.0f, range = 0;
+	DropItem = 0;
+
 	view = down;
-	//DeltaTime = 0.0f;
+	InTimer = 0.0f;
+
 	rect = { 0,0,0,0 };
-}
 
-MONSTER::MONSTER(int ntype, int nx, int ny) // 몬스터 생성자 (시드, 좌표)
-{
-	type = ntype;
-	x = nx, y = ny;
-	view = down;
-	//DeltaTime = 0;
-
-	switch (type) {
-	case 1:
-		hp = 200, power = 10, Mspeed = 10, Aspeed = 1.0f, range = 50;
-		size = 20, DropItem = 1;
-		break;
-	default:
-		hp = 100, power = 10, Mspeed = 10, Aspeed = 1.0f, range = 50;
-		size = 10, DropItem = 0;
-		break;
-	}
-
-	rect.left = x - size;
-	rect.top = y - size;
-	rect.right = x + size;
-	rect.bottom = y + size;
+	Animation = 0;
 }
 
 MONSTER::~MONSTER() // 몬스터 소멸자
@@ -46,8 +27,7 @@ MONSTER::~MONSTER() // 몬스터 소멸자
 
 void MONSTER::SetSpot(int nx, int ny) // 좌표 설정
 {
-	x = nx;
-	y = ny;
+	x = nx; y = ny;
 }
 
 void MONSTER::SetHp(int nhp) // 체력 설정
@@ -70,9 +50,9 @@ void MONSTER::SetAspeed(int nAspeed) // 공격속도 설정
 	Aspeed = nAspeed;
 }
 
-void MONSTER::SetSize(int nsize) // 크기 설정
+void MONSTER::SetSize(int n1size, int n2size) // 크기 설정
 {
-	size = nsize;
+	Xsize = n1size; Ysize = n2size;
 }
 
 void MONSTER::SetDropItem(int nDropItem) // 드랍 아이템 시드값 설정
@@ -85,20 +65,28 @@ void MONSTER::SetView(int nview) // 시점 설정
 	view = nview;
 }
 
-void MONSTER::SetRect(int x1, int y1, int x2, int y2) // 그리기 및 충돌처리 좌표 설정 (int)
+void MONSTER::SetRect()
 {
-	rect.left = x1 - size;
-	rect.top = y1 - size;
-	rect.right = x1 + size;
-	rect.bottom = y1 + size;
+	rect.left = x;
+	rect.top = y;
+	rect.right = x + Xsize;
+	rect.bottom = y + Ysize;
 }
 
-void MONSTER::SetRect(RECT nrect) // 그리기 및 충돌처리 좌표 설정 (rect)
+void MONSTER::SetMonster(int ntype)
 {
-	rect.left = nrect.left;
-	rect.top = nrect.top;
-	rect.right = nrect.right;
-	rect.bottom = nrect.bottom;
+	switch (ntype)
+	{
+	case 1:
+		type = 1;
+		Xsize = 19, Ysize = 15;
+		hp = 200, power = 10, Mspeed = 10, Aspeed = 1.0f, range = 0;
+		DropItem = 1;
+		Animation = 0;
+		break;
+	default:
+		break;
+	}
 }
 
 void MONSTER::MoveToPlayer(POINT player1, float DeltaTime) // 플레이어의 좌표를 받아 이동하는 함수
@@ -141,5 +129,22 @@ void MONSTER::Update() // 내부타이머 함수
 
 void MONSTER::Draw(HDC hDC) // 그리기 함수
 {
-	Rectangle(hDC, rect.left, rect.top, rect.right, rect.bottom);
+	CImage img;
+	switch (type)
+	{
+	case 1:
+		img.Load(TEXT("Monster_graphics/monster_01_fly.png"));
+		if (Animation == 0) {
+			img.Draw(hDC, x, y, Xsize, Ysize, 7, 7, Xsize, Ysize);
+			Animation++;
+		}
+		else if (Animation == 1) {
+			img.Draw(hDC, x, y, Xsize, Ysize, 38, 5, Xsize, Ysize);
+			Animation--;
+		}
+		break;
+	default:
+		break;
+	}
+	img.Destroy();
 }

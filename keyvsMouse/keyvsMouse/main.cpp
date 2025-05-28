@@ -90,7 +90,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		BGoldBitmap = (HBITMAP)SelectObject(hMem1DC, BackGroundhBitmap);
 		
-
 		if (MoveCheck == 0) {
 			player.Draw(hDC, hMem1DC);	
 		}
@@ -106,12 +105,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		else if(MoveCheck == 4) {
 			player.RMDraw(hDC, hMem1DC, MoveCount);
 		}
-		
 		DeleteDC(hMem1DC);
-		EndPaint(hWnd, &ps);
+
 		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
 			monster.Draw(hDC);
 		}
+
+		EndPaint(hWnd, &ps);
 		break;
 	case WM_CHAR:
 		break;
@@ -176,7 +176,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_LBUTTONDOWN:
-		monsters.push_back({ 1,cursor.x,cursor.y }); // 몬스터 생성
+		monsters.emplace_back();
+		monsters.back().SetSpot(cursor.x, cursor.y);
+		monsters.back().SetRect();
+		monsters.back().SetMonster(1);
+
 		break;
 	case WM_MOUSEMOVE:
 
