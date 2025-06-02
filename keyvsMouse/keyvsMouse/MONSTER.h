@@ -3,11 +3,13 @@
 #include <iostream>
 #include <cmath>
 #include <atlImage.h>
+#include <wingdi.h>
+#pragma comment(lib, "msimg32.lib")
 
 class MONSTER
 {
 private:
-	int x, y; // 몬스터 좌상단 좌표
+	float x, y; // 몬스터 좌상단 좌표
 	int type; // 몬스터 시드값
 	int Xsize; // 몬스터 x 크기
 	int Ysize; // 몬스터 y 크기
@@ -53,7 +55,7 @@ public:
 	void Death(); // 죽음 함수
 
 	// 부가요소 함수
-	void Update(); // 위치 업데이트
+	void Update(float DeltaTime); // 위치 업데이트
 	void Draw(HDC hDC); // 그리기
 
 

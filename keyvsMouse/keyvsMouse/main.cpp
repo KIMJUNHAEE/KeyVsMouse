@@ -62,7 +62,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static PLAYER1 player(10, 500, 500, 5, 10, 10, 2, 0, down); // 생성자
 
 	static POINT cursor; // 마우스 커서 좌표
-	static float deltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
+	static float DeltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
 	
 	static std::vector<MONSTER> monsters; // 몬스터 벡터 선언
 
@@ -107,6 +107,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		DeleteDC(hMem1DC);
 
+		char buf[100];
+		sprintf_s(buf, "%d %d", player.Tx, player.Ty);
+		TextOutA(hDC, 10, 10, buf, strlen(buf));
+
 		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
 			monster.Draw(hDC);
 		}
@@ -116,11 +120,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_CHAR:
 		break;
 
-	case WM_TIMER:
-		
+	case WM_TIMER: {
+		player.SetTarget();
+		POINT point = { player.Tx, player.Ty };
+
+		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
+			monster.Update(DeltaTime);
+			monster.MoveToPlayer(point, DeltaTime);
+		}
+
 		InvalidateRect(hWnd, NULL, true);
 		break;
-
+	}
 	case WM_KEYDOWN:
 		if (wParam == 'W') {
 			player.MoveUp();

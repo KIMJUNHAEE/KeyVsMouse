@@ -26,6 +26,5 @@
     <Image Include="P1_graphics\P1_4.bmp" />
     <Image Include="P1_graphics\P1_5.bmp" />
     <Image Include="P1_graphics\P1_6.bmp" />
-    <Image Include="monster_01_fly.png" />
   </ItemGroup>
 </Project>
