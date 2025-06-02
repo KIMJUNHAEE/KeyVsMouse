@@ -187,7 +187,7 @@ void PLAYER1::Draw(HDC nhDC, HDC nMemDC) { // 출력 dc, 메모리 dc 받음, 정지상태 
 	SetBodyRect();
 	view = down; // 시선 설정
 	HBITMAP oldBitmap = (HBITMAP)SelectObject(nMemDC, P1BitMap[0]);
-
+	
 	//몸통 메모리 -> 출력디시로
 	TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 44, 21, 14, RGB(255, 200, 200));
 
@@ -202,7 +202,7 @@ void PLAYER1::DMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 아래로 움직임 그리기
 	SetBodyRect();
 	view = down; // 시선 설정
 	HBITMAP oldBitmap = (HBITMAP)SelectObject(nMemDC, P1BitMap[0]); // 아래로 움직임 비트맵 선택
-
+	
 	if (nCount == 0) {
 		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 197, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
@@ -244,7 +244,7 @@ void PLAYER1::UMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 위로 움직임 그리기
 	SetBodyRect();
 	view = up; // 시선 설정
 	HBITMAP oldBitmap = (HBITMAP)SelectObject(nMemDC, P1BitMap[0]); // 아래로 움직임 비트맵 선택
-
+	
 
 	if (nCount == 9) {
 		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 197, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
@@ -287,7 +287,7 @@ void PLAYER1::RMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 오른쪽으로 움직임 그
 	SetBodyRect();
 	view = right; // 시선 설정
 	HBITMAP oldBitmap = (HBITMAP)SelectObject(nMemDC, P1BitMap[0]); // 아래로 움직임 비트맵 선택
-
+	
 	if (nCount == 0) {
 		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
@@ -330,7 +330,7 @@ void PLAYER1::LMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 왼쪽으로 움직임 그리
 	SetBodyRect();
 	view = left; // 시선 설정
 	HBITMAP oldBitmap = (HBITMAP)SelectObject(nMemDC, P1BitMap[0]); // 아래로 움직임 비트맵 선택
-
+	
 	if (nCount == 0) {
 		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 70, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}

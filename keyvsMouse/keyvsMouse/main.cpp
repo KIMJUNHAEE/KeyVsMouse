@@ -6,6 +6,7 @@
 
 #include "PLAYER1.h"
 #include "MONSTER.h"
+#include "TEARS.h"
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
@@ -58,8 +59,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hDC, hMem1DC, hMem2DC;
+	HBITMAP OldBit[3];
 	static HBITMAP BackGroundhBitmap;
-	HBITMAP BGoldBitmap;
 	HBITMAP hBitmap, hOldBitmap;
 
 	static RECT ViewRect;
@@ -69,14 +70,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 	static POINT cursor; // 마우스 커서 좌표
 	static float DeltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
-	
+
 	static std::vector<MONSTER> monsters; // 몬스터 벡터 선언
+	static std::vector<TEARS> tears; // 눈물 백터 선언
 
 	switch (iMessage) {
 
 	case WM_CREATE:
-		GetClientRect(hWnd, &ViewRect);
 		ImageCreate();
+		GetClientRect(hWnd, &ViewRect);
+
 
 		player.SetCamera();
 
@@ -93,39 +96,39 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT: {
 		hDC = BeginPaint(hWnd, &ps);
 
-		hMem1DC = CreateCompatibleDC(hDC);
-		BGoldBitmap = (HBITMAP)SelectObject(hMem1DC, BackGroundhBitmap);
-		FillRect(hMem1DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
-		if (MoveCheck == 0) {
-			player.Draw(hDC, hMem1DC);
-		}
-		else if (MoveCheck == 1) {
-			player.UMDraw(hDC, hMem1DC, MoveCount);
-		}
-		else if (MoveCheck == 2) {
-			player.DMDraw(hDC, hMem1DC, MoveCount);
-		}
-		else if (MoveCheck == 3) {
-			player.LMDraw(hDC, hMem1DC, MoveCount);
-		}
-		else if (MoveCheck == 4) {
-			player.RMDraw(hDC, hMem1DC, MoveCount);
-		}
-		DeleteDC(hMem1DC);
-
-
 		// Mem2DC 에 몬스터 더블버퍼링
-		hMem2DC = CreateCompatibleDC(hDC);
+		hMem2DC = CreateCompatibleDC(hDC); // hMem2DC에다가 다 그림
+		hMem1DC = CreateCompatibleDC(hMem2DC); // hMem1DC는 플레이어 버퍼용, 1이랑 2 연결시켜주는 줄
 		hBitmap = CreateCompatibleBitmap(hDC, WINDOW_WIDTH, WINDOW_HEIGHT);
 		hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap);
 		FillRect(hMem2DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
+		
+
+		if (MoveCheck == 0) {
+			player.Draw(hMem2DC, hMem1DC);
+		}
+		else if (MoveCheck == 1) {
+			player.UMDraw(hMem2DC, hMem1DC, MoveCount);
+		}
+		else if (MoveCheck == 2) {
+			player.DMDraw(hMem2DC, hMem1DC, MoveCount);
+		}
+		else if (MoveCheck == 3) {
+			player.LMDraw(hMem2DC, hMem1DC, MoveCount);
+		}
+		else if (MoveCheck == 4) {
+			player.RMDraw(hMem2DC, hMem1DC, MoveCount);
+		}
 		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
 			monster.Draw(hMem2DC);
 		}
+		
 		BitBlt(hDC, ViewRect.left, ViewRect.top, ViewRect.right, ViewRect.bottom, hMem2DC, 0, 0, SRCCOPY);
+		DeleteDC(hMem1DC);
 		SelectObject(hMem2DC, hOldBitmap);
 		DeleteObject(hBitmap);
 		DeleteDC(hMem2DC);
+
 		EndPaint(hWnd, &ps);
 		break;
 	}
@@ -137,6 +140,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		player.SetBodyRect();
 		player.SetTarget();
 		POINT point = { player.Tx, player.Ty };
+
 		for (auto monster = monsters.begin(); monster != monsters.end();) {
 			if (monster->Update(DeltaTime)) {
 				monster = monsters.erase(monster);
@@ -147,6 +151,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 		}
 
+
+
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 	}
@@ -154,54 +160,45 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		if (wParam == 'W') {
 			player.MoveUp();
 			MoveCheck = 1;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount++;
 			if (MoveCount >= 9) MoveCount = 0;
 		}
 		else if (wParam == 'S') {
 			player.MoveDown();
 			MoveCheck = 2;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount++;
 			if (MoveCount >= 9) MoveCount = 0;
-		}else if(wParam == 'A') {
+		}
+		else if (wParam == 'A') {
 			player.MoveLeft();
 			MoveCheck = 3;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount++;
 			if (MoveCount >= 9) MoveCount = 0;
 		}
 		else if (wParam == 'D') {
 			player.MoveRight();
 			MoveCheck = 4;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount++;
 			if (MoveCount >= 9) MoveCount = 0;
 		}
-		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 	case WM_KEYUP:
-		if(wParam == 'W') {
+		if (wParam == 'W') {
 			MoveCheck = 0;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount = 0;
 		}
 		else if (wParam == 'S') {
 			MoveCheck = 0;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount = 0;
 		}
-		else if(wParam == 'A') {
+		else if (wParam == 'A') {
 			MoveCheck = 0;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount = 0;
 		}
-		else if(wParam == 'D') {
+		else if (wParam == 'D') {
 			MoveCheck = 0;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount = 0;
 		}
-		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 
 	case WM_LBUTTONDOWN:
@@ -215,7 +212,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		cursor.x = LOWORD(lParam);
 		cursor.y = HIWORD(lParam);
-		
+
 		break;
 	case WM_DESTROY:
 		KillTimer(hWnd, 1); // 타이머 제거
@@ -224,4 +221,3 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	}
 	return (DefWindowProc(hWnd, iMessage, wParam, lParam));
 }
-	

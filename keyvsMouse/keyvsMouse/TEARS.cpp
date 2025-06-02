@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <math.h>
 
-
-
 void TEARS::SetTearRect() { // 눈물 RECT 설정 함수
 
 
