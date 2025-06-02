@@ -72,7 +72,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static float DeltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
 
 	static std::vector<MONSTER> monsters; // 몬스터 벡터 선언
-	static std::vector<TEARS> tears; // 눈물 백터 선언
+	//static std::vector<TEARS> tears; // 눈물 백터 선언
 
 	switch (iMessage) {
 
@@ -97,6 +97,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hDC = BeginPaint(hWnd, &ps);
 
 		// Mem2DC 에 몬스터 더블버퍼링
+
 		hMem2DC = CreateCompatibleDC(hDC); // hMem2DC에다가 다 그림
 		hMem1DC = CreateCompatibleDC(hMem2DC); // hMem1DC는 플레이어 버퍼용, 1이랑 2 연결시켜주는 줄
 		hBitmap = CreateCompatibleBitmap(hDC, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -122,12 +123,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
 			monster.Draw(hMem2DC);
 		}
-		
+
 		BitBlt(hDC, ViewRect.left, ViewRect.top, ViewRect.right, ViewRect.bottom, hMem2DC, 0, 0, SRCCOPY);
-		DeleteDC(hMem1DC);
+
 		SelectObject(hMem2DC, hOldBitmap);
 		DeleteObject(hBitmap);
 		DeleteDC(hMem2DC);
+		DeleteDC(hMem1DC);
 
 		EndPaint(hWnd, &ps);
 		break;

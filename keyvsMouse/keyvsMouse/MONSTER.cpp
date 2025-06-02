@@ -162,7 +162,6 @@ bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
 
 void MONSTER::Draw(HDC hDC) // 그리기 함수
 {
-	CImage img;
 	if (Animation == 0) {
 		return;
 	}
