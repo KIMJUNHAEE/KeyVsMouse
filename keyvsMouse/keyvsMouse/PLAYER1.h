@@ -20,7 +20,6 @@ private:
 	int view; // 시선
 
 	RECT Came; // 카메라 영역 (1000,1000)
-
 	HBITMAP P1BitMap[7]; // 플레이어 비트맵
 
 public:
