@@ -19,8 +19,6 @@ private:
 	int Pct[80]; // 패시브 아이템 시드 배열
 	int view; // 시선
 
-	RECT HeadRect; // 플레이어 머리 그리기용 좌표 
-	RECT BodyRect; // 플레이어 몸통 그리기용 좌표 
 	RECT Came; // 카메라 영역 (1000,1000)
 
 	HBITMAP P1BitMap[7]; // 플레이어 비트맵
@@ -30,6 +28,8 @@ public:
 	~PLAYER1(); // 소멸자
 
 	int Tx, Ty; // 플레이어 타겟 좌표
+	RECT HeadRect; // 플레이어 머리 그리기용 좌표 
+	RECT BodyRect; // 플레이어 몸통 그리기용 좌표 
 	float InTimer = 0.0f; // 내부 타이머
 
 	// 값 변경 함수
