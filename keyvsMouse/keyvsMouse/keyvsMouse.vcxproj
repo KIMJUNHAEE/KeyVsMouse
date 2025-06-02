@@ -129,6 +129,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DRAW.cpp" />
+    <ClCompile Include="IMAGE.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MONSTER.cpp" />
     <ClCompile Include="OBJECT.cpp" />
@@ -138,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DRAW.h" />
+    <ClInclude Include="IMAGE.h" />
     <ClInclude Include="MONSTER.h" />
     <ClInclude Include="OBJECT.h" />
     <ClInclude Include="PLAYER1.h" />

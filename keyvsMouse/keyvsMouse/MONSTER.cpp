@@ -4,8 +4,6 @@ enum DIRECTION {
 	left = 0, right = 1, up = 2, down = 3
 };
 
-
-
 MONSTER::MONSTER() // 디폴트 몬스터 생성자
 {
 	x = 0, y = 0;
@@ -125,8 +123,8 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 			x += MoveX;
 			y += MoveY;
 		}
+		SetRect();
 	}
-	SetRect();
 }
 
 void MONSTER::MoveToMachine(POINT buliding) // 기물의 좌표를 받아 이동하는 함수
@@ -150,47 +148,42 @@ void MONSTER::Death() // 사망 함수
 
 }
 
-void MONSTER::Update(float DeltaTime) // 내부타이머 함수
+bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
 {
 	if (Animation == 2 && hp <= 0) {
 		Death();
 	}
+	else if (Animation == 0 && hp == 0) {
+		return true;
+	}
+	return false;
 }
+
 
 void MONSTER::Draw(HDC hDC) // 그리기 함수
 {
+	CImage img;
 	if (Animation == 0) {
 		return;
 	}
-	CImage img;
 	if (type == 1) {
 		if (hp > 0) {
 			// Rectangle(hDC, rect.left, rect.top, rect.right, rect.bottom); 디버깅
 			if (Animation == 1) {
-				img.Load(TEXT("Monster_graphics/monster_01_fly_01.png"));
-				HDC hSrcDC = img.GetDC();
-				img.Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+				IMGfly[1].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 				Animation++;
 			}
 			else if (Animation == 2) {
-				img.Load(TEXT("Monster_graphics/monster_01_fly_02.png"));
-				HDC hSrcDC = img.GetDC();
-				img.Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+				IMGfly[2].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 				Animation--;
 			}
 		}
 		else {
-			TCHAR filePath[64];
-			_stprintf_s(filePath, TEXT("Monster_graphics/monster_01_fly_0%d.png"), Animation);
-			img.Load(filePath);
-			HDC hSrcDC = img.GetDC();
-			img.Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+			IMGfly[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 			Animation++;
 			if (Animation > 13) {
 				Animation = 0;
 			}
 		}
 	}
-	img.ReleaseDC();
-	img.Destroy();
 }

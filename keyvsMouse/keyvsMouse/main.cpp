@@ -3,8 +3,12 @@
 #include <stdlib.h>
 #include <time.h>	
 #include <vector>
+
 #include "PLAYER1.h"
 #include "MONSTER.h"
+
+#define WINDOW_WIDTH 1600
+#define WINDOW_HEIGHT 900
 
 int MoveCheck = 0; // 0: 정지, 1: 위, 2: 아래, 3: 왼쪽, 4: 오른쪽
 int MoveCount = 0; // 움직임 카운트 (애니메이션 프레임을 위한 카운트)
@@ -38,7 +42,7 @@ int WINAPI WinMain(HINSTANCE hlnstance, HINSTANCE hPrevlnstance, LPSTR lpszCmdPa
 	WndClass.hIconSm = LoadIcon(NULL, IDI_ERROR);
 	RegisterClassExW(&WndClass); // RegisterClassExW -> 유니코드 지원
 
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME, 0, 0, 1600, 900, NULL, (HMENU)NULL, hlnstance, NULL);
+	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, (HMENU)NULL, hlnstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
@@ -49,12 +53,14 @@ int WINAPI WinMain(HINSTANCE hlnstance, HINSTANCE hPrevlnstance, LPSTR lpszCmdPa
 	return Message.wParam;
 }
 
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hDC, hMem1DC, hMem2DC;
 	static HBITMAP BackGroundhBitmap;
 	HBITMAP BGoldBitmap;
+	HBITMAP hBitmap, hOldBitmap;
 
 	static RECT ViewRect;
 	static HPEN hPen, hOldPen;
@@ -69,6 +75,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	switch (iMessage) {
 
 	case WM_CREATE:
+		GetClientRect(hWnd, &ViewRect);
+		ImageCreate();
+
 		player.SetCamera();
 
 		TCHAR BGfilepath[256];
@@ -81,16 +90,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
 		break;
-	case WM_PAINT:
+	case WM_PAINT: {
 		hDC = BeginPaint(hWnd, &ps);
-		hMem1DC = CreateCompatibleDC(hDC);
 
+		hMem1DC = CreateCompatibleDC(hDC);
 		BGoldBitmap = (HBITMAP)SelectObject(hMem1DC, BackGroundhBitmap);
-		
+		FillRect(hMem1DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
 		if (MoveCheck == 0) {
-			player.Draw(hDC, hMem1DC);	
+			player.Draw(hDC, hMem1DC);
 		}
-		else if(MoveCheck == 1) {
+		else if (MoveCheck == 1) {
 			player.UMDraw(hDC, hMem1DC, MoveCount);
 		}
 		else if (MoveCheck == 2) {
@@ -99,21 +108,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		else if (MoveCheck == 3) {
 			player.LMDraw(hDC, hMem1DC, MoveCount);
 		}
-		else if(MoveCheck == 4) {
+		else if (MoveCheck == 4) {
 			player.RMDraw(hDC, hMem1DC, MoveCount);
 		}
 		DeleteDC(hMem1DC);
 
-		char buf[100];
-		sprintf_s(buf, "%d %d", player.Tx, player.Ty);
-		TextOutA(hDC, 10, 10, buf, strlen(buf));
 
+		// Mem2DC 에 몬스터 더블버퍼링
+		hMem2DC = CreateCompatibleDC(hDC);
+		hBitmap = CreateCompatibleBitmap(hDC, WINDOW_WIDTH, WINDOW_HEIGHT);
+		hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap);
+		FillRect(hMem2DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
 		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
-			monster.Draw(hDC);
+			monster.Draw(hMem2DC);
 		}
-
+		BitBlt(hDC, ViewRect.left, ViewRect.top, ViewRect.right, ViewRect.bottom, hMem2DC, 0, 0, SRCCOPY);
+		SelectObject(hMem2DC, hOldBitmap);
+		DeleteObject(hBitmap);
+		DeleteDC(hMem2DC);
 		EndPaint(hWnd, &ps);
 		break;
+	}
 	case WM_CHAR:
 		break;
 
@@ -122,13 +137,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		player.SetBodyRect();
 		player.SetTarget();
 		POINT point = { player.Tx, player.Ty };
-
-		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
-			monster.Update(DeltaTime);
-			monster.MoveToPlayer(point, player.HeadRect, player.BodyRect, DeltaTime);
+		for (auto monster = monsters.begin(); monster != monsters.end();) {
+			if (monster->Update(DeltaTime)) {
+				monster = monsters.erase(monster);
+			}
+			else {
+				monster->MoveToPlayer(point, player.HeadRect, player.BodyRect, DeltaTime);
+				monster++;
+			}
 		}
 
-		InvalidateRect(hWnd, NULL, true);
+		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 	}
 	case WM_KEYDOWN:

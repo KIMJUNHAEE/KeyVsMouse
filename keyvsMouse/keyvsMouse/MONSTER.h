@@ -3,8 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <atlImage.h>
-#include <wingdi.h>
-#pragma comment(lib, "msimg32.lib")
+#include "IMAGE.h"
 
 class MONSTER
 {
@@ -58,7 +57,7 @@ public:
 	void Death(); // 죽음 함수
 
 	// 부가요소 함수
-	void Update(float DeltaTime); // 위치 업데이트
+	bool Update(float DeltaTime); // 업데이트
 	void Draw(HDC hDC); // 그리기
 
 

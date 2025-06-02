@@ -8,6 +8,7 @@
     <ClCompile Include="PLAYER1.cpp" />
     <ClCompile Include="SHOP.cpp" />
     <ClCompile Include="TEARS.cpp" />
+    <ClCompile Include="IMAGE.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DRAW.h" />
@@ -17,6 +18,7 @@
     <ClInclude Include="P1RESOURCE.h" />
     <ClInclude Include="SHOP.h" />
     <ClInclude Include="TEARS.h" />
+    <ClInclude Include="IMAGE.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PLAYER1.rc" />
