@@ -2,7 +2,7 @@
 #include <cstdio> 
 #include <tchar.h>
 
-PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, int nAspeed, int nrange, int nsize, int nAct, int nview) { // 생성자
+PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange, int nsize, int nAct, int nview) { // 생성자
 	hp = nhp;
 	x = nx;
 	y = ny;
@@ -21,13 +21,6 @@ PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, int nAspeed, int nrange, 
 		if (P1BitMap[i] == NULL) {
 			MessageBox(NULL, _T("비트맵 로딩 실패!"), _T("오류"), MB_OK);
 		}
-	}
-
-	TCHAR filePath[256];
-	_stprintf_s(filePath, _T("P1_graphics/tears.bmp"), 6); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
-	P1BitMap[6] = (HBITMAP)LoadImage(NULL, filePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	if (P1BitMap[6] == NULL) {
-		MessageBox(NULL, _T("비트맵 로딩 실패!"), _T("오류"), MB_OK);
 	}
 };
 
@@ -367,20 +360,11 @@ void PLAYER1::LMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 왼쪽으로 움직임 그리
 	SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 };
 
-void PLAYER1::AtDraw(HDC nhDC, HDC nMemDC) {
-
-
-	if (view == down) {
-
+int PLAYER1::ShootTime(float deltaTime) { // 공격 타이머 업데이트 함수
+	InTimer += deltaTime;
+	if (InTimer >= Aspeed) {
+		InTimer = 0.0f; // 타이머 초기화
+		return 1; // 공격!
 	}
-	else if (view == up) {
-
-	}
-	else if (view == right) {
-
-	}
-	else if (view == left) {
-
-	}
-
+	return 0; // 쏘지마라!
 };
