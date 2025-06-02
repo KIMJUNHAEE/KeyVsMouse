@@ -134,6 +134,7 @@
     <ClCompile Include="OBJECT.cpp" />
     <ClCompile Include="PLAYER1.cpp" />
     <ClCompile Include="SHOP.cpp" />
+    <ClCompile Include="TEARS.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DRAW.h" />
@@ -142,6 +143,7 @@
     <ClInclude Include="PLAYER1.h" />
     <ClInclude Include="P1RESOURCE.h" />
     <ClInclude Include="SHOP.h" />
+    <ClInclude Include="TEARS.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PLAYER1.rc" />

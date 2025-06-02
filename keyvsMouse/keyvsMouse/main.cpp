@@ -69,9 +69,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	switch (iMessage) {
 
 	case WM_CREATE:
-
-		player.SetHeadRect();
-		player.SetBodyRect();
 		player.SetCamera();
 
 		TCHAR BGfilepath[256];
@@ -121,6 +118,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_TIMER: {
+		player.SetHeadRect();
+		player.SetBodyRect();
 		player.SetTarget();
 		POINT point = { player.Tx, player.Ty };
 
