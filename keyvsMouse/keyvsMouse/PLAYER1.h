@@ -12,7 +12,7 @@ private:
 	int hp; // 플레이어 체력
 	int x, y; // 플레이어 머리 좌상단 좌표
 	int Mspeed; // 이동속도
-	int Aspeed; // 공격속도
+	float Aspeed; // 공격속도
 	int range; // 공격 사거리
 	int size; // 플레이어 크기
 	int Act; // 액티브 아이템 시드값
@@ -20,10 +20,10 @@ private:
 	int view; // 시선
 
 	RECT Came; // 카메라 영역 (1000,1000)
-	HBITMAP P1BitMap[7]; // 플레이어 비트맵
+	HBITMAP P1BitMap[6]; // 플레이어 비트맵
 
 public:
-	PLAYER1(int nhp, int nx, int ny, int nMspeed, int nAspeed, int nrange, int nsize, int nAct, int nview); // 생성자
+	PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange, int nsize, int nAct, int nview); // 생성자
 	~PLAYER1(); // 소멸자
 
 	int Tx, Ty; // 플레이어 타겟 좌표
@@ -59,7 +59,7 @@ public:
 	void UMDraw(HDC nhDC, HDC nMemDC, int nCount); // 위로 움직임 그리기
 	void RMDraw(HDC nhDC, HDC nMemDC, int nCount); // 오른쪽으로 움직임 그리기
 	void LMDraw(HDC nhDC, HDC nMemDC, int nCount); // 왼쪽으로 움직임 그리기
-	void AtDraw(HDC nhDC, HDC nMemDC); // 눈물 그리기
+	int ShootTime(float deltaTime); // 공격 타이머 업데이트
 
 };
 

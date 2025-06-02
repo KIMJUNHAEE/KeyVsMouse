@@ -157,6 +157,9 @@
     <Image Include="P1_graphics\P1_4.bmp" />
     <Image Include="P1_graphics\P1_5.bmp" />
     <Image Include="P1_graphics\P1_6.bmp" />
+    <Image Include="P1_graphics\tears_1.bmp" />
+    <Image Include="P1_graphics\tears_2.bmp" />
+    <Image Include="P1_graphics\tears_3.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

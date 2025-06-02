@@ -13,6 +13,10 @@
 
 int MoveCheck = 0; // 0: 정지, 1: 위, 2: 아래, 3: 왼쪽, 4: 오른쪽
 int MoveCount = 0; // 움직임 카운트 (애니메이션 프레임을 위한 카운트)
+float dx; // 플레이어-몬스터 거리 x
+float dy; // 플레이어-몬스터 거리 y
+float Length; // 플레이어-몬스터 거리
+float MinLength = 10000;// 플레이어-몬스터 최소 거리
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -66,13 +70,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static RECT ViewRect;
 	static HPEN hPen, hOldPen;
 	static HBRUSH hBrush, hOldBrush;
-	static PLAYER1 player(10, 500, 500, 5, 10, 10, 2, 0, down); // 생성자
+	static PLAYER1 player(10, 500, 500, 5, 3.0f, 10, 2, 0, down); // 생성자
 
 	static POINT cursor; // 마우스 커서 좌표
 	static float DeltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
 
 	static std::vector<MONSTER> monsters; // 몬스터 벡터 선언
-	//static std::vector<TEARS> tears; // 눈물 백터 선언
+	static std::vector<TEARS> tears; // 눈물 백터 선언
 
 	switch (iMessage) {
 
@@ -141,6 +145,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		player.SetHeadRect();
 		player.SetBodyRect();
 		player.SetTarget();
+		int ShootCheck = player.ShootTime(DeltaTime); // 플레이어 눈물발사 시간 체크, 기본 3초마다 쏨
+
+		if (ShootCheck == 1) {
+			static TEARS tear(player.Tx,player.Ty); // 눈물 객체 생성
+
+			for (auto monster = monsters.begin(); monster != monsters.end();) {
+				dx = monster->GetX() - player.Tx;
+				dy = monster->GetY() - player.Ty;
+				Length = sqrt(dx * dx + dy * dy);
+
+				if (Length <= MinLength) {
+					MinLength = Length;
+				}
+			}
+			
+			for (auto monster = monsters.begin(); monster != monsters.end();) {
+				dx = monster->GetX() - player.Tx;
+				dy = monster->GetY() - player.Ty;
+				Length = sqrt(dx * dx + dy * dy);
+
+				if (Length <= MinLength) {
+					tear.Shoot(monster->GetX(), monster->GetY());
+				}
+			}
+
+		}
+
 		POINT point = { player.Tx, player.Ty };
 
 		for (auto monster = monsters.begin(); monster != monsters.end();) {
@@ -153,6 +184,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 		}
 
+		
 
 
 		InvalidateRect(hWnd, NULL, FALSE);
