@@ -126,7 +126,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
 			monster.Update(DeltaTime);
-			monster.MoveToPlayer(point, DeltaTime);
+			monster.MoveToPlayer(point, player.HeadRect, player.BodyRect, DeltaTime);
 		}
 
 		InvalidateRect(hWnd, NULL, true);

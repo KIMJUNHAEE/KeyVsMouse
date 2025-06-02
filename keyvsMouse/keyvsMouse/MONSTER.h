@@ -28,7 +28,6 @@ private:
 
 public:
 
-
 	MONSTER(); // 디폴트 생성자
 	~MONSTER(); // 소멸자
 
@@ -43,11 +42,15 @@ public:
 	void SetView(int nview); // 몬스터 시선 설정
 	void SetRect(); // 그리기용
 
+	// 값 전달 함수
+	int GetX();
+	int GetY();
+
 	// 몬스터 타입 설정
 	void SetMonster(int type);
 
 	// 이동함수
-	void MoveToPlayer(POINT player1, float DeltaTime); // 플레이어 위치 이동 함수
+	void MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime); // 플레이어 위치 이동 함수
 	void MoveToMachine(POINT buliding); // 기물 위치 근처 이동 함수
 
 	// 행동함수
