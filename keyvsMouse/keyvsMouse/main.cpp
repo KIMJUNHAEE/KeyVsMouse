@@ -93,9 +93,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT: {
 		hDC = BeginPaint(hWnd, &ps);
 
+		// Mem2DC 에 몬스터 더블버퍼링
+		hMem2DC = CreateCompatibleDC(hDC);
+		hBitmap = CreateCompatibleBitmap(hDC, WINDOW_WIDTH, WINDOW_HEIGHT);
+		hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap);
+		FillRect(hMem2DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
+		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
+			monster.Draw(hMem2DC);
+		}
+		BitBlt(hDC, ViewRect.left, ViewRect.top, ViewRect.right, ViewRect.bottom, hMem2DC, 0, 0, SRCCOPY);
+		SelectObject(hMem2DC, hOldBitmap);
+		DeleteObject(hBitmap);
+		DeleteDC(hMem2DC);
+
 		hMem1DC = CreateCompatibleDC(hDC);
-		BGoldBitmap = (HBITMAP)SelectObject(hMem1DC, BackGroundhBitmap);
-		FillRect(hMem1DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
 		if (MoveCheck == 0) {
 			player.Draw(hDC, hMem1DC);
 		}
@@ -113,19 +124,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		DeleteDC(hMem1DC);
 
-
-		// Mem2DC 에 몬스터 더블버퍼링
-		hMem2DC = CreateCompatibleDC(hDC);
-		hBitmap = CreateCompatibleBitmap(hDC, WINDOW_WIDTH, WINDOW_HEIGHT);
-		hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap);
-		FillRect(hMem2DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
-		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
-			monster.Draw(hMem2DC);
-		}
-		BitBlt(hDC, ViewRect.left, ViewRect.top, ViewRect.right, ViewRect.bottom, hMem2DC, 0, 0, SRCCOPY);
-		SelectObject(hMem2DC, hOldBitmap);
-		DeleteObject(hBitmap);
-		DeleteDC(hMem2DC);
 		EndPaint(hWnd, &ps);
 		break;
 	}
@@ -154,54 +152,44 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		if (wParam == 'W') {
 			player.MoveUp();
 			MoveCheck = 1;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount++;
 			if (MoveCount >= 9) MoveCount = 0;
 		}
 		else if (wParam == 'S') {
 			player.MoveDown();
 			MoveCheck = 2;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount++;
 			if (MoveCount >= 9) MoveCount = 0;
 		}else if(wParam == 'A') {
 			player.MoveLeft();
 			MoveCheck = 3;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount++;
 			if (MoveCount >= 9) MoveCount = 0;
 		}
 		else if (wParam == 'D') {
 			player.MoveRight();
 			MoveCheck = 4;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount++;
 			if (MoveCount >= 9) MoveCount = 0;
 		}
-		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 	case WM_KEYUP:
 		if(wParam == 'W') {
 			MoveCheck = 0;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount = 0;
 		}
 		else if (wParam == 'S') {
 			MoveCheck = 0;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount = 0;
 		}
 		else if(wParam == 'A') {
 			MoveCheck = 0;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount = 0;
 		}
 		else if(wParam == 'D') {
 			MoveCheck = 0;
-			InvalidateRect(hWnd, NULL, FALSE);
 			MoveCount = 0;
 		}
-		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 
 	case WM_LBUTTONDOWN:
