@@ -93,6 +93,13 @@ void MONSTER::SetMonster(int ntype)
 		DropItem = 1;
 		Animation = 1;
 		break;
+	case 2:
+		type = 2;
+		Xsize = 32, Ysize = 32;
+		hp = 400, power = 30, Mspeed = 30, Aspeed = 1.0f, range = 0;
+		DropItem = 1;
+		Animation = 1;
+		break;
 	default:
 		break;
 	}
@@ -103,7 +110,15 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 	if (hp > 0) {
 		RECT lprcDest;
 		if (IntersectRect(&lprcDest, &rect, &head) || IntersectRect(&lprcDest, &rect, &body)) {
-			Death();
+			if (type == 1) { // 파리
+				Death();
+			}
+			else if (type == 2) { // 디그다?
+				if (Animation == 3 || Animation == 4) {
+					Animation = 5;
+					InTimer = 0.0f;
+				}
+			}
 			return;
 		}
 
@@ -115,6 +130,29 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 		dx = player1.x - x;
 		dy = player1.y - y;
 		distance = sqrt(dx * dx + dy * dy); // 플레이어와의 거리
+
+		if (type == 2) {
+			if (Animation == 1) {
+				if (distance < 200.0f) {
+					Animation++;
+					InTimer = 0.0f;
+				}
+			}
+			else if (Animation == 2) {
+				if (InTimer <= 1000.0f && distance > 200.0f) {
+					InTimer = 1000.0f;
+				}
+			}
+			else if (Animation >= 5 && Animation <= 7) {
+				if (InTimer <= 3.0f) {
+					return;
+				}
+				else {
+					Animation = 2;
+					InTimer = 0.0f;
+				}
+			}
+		}
 
 		if (distance > 0.0001f) {
 			step = Mspeed * DeltaTime;
@@ -138,27 +176,36 @@ void MONSTER::Hit(int power) // 피격 함수
 
 void MONSTER::Death() // 사망 함수
 {
-	Animation = 3;
 	hp = 0;
-	x = x + (Xsize / 2);
-	y = y + (Ysize / 2);
-	Xsize = 59, Ysize = 47;
-	x = x - (Xsize / 2);
-	y = y - (Ysize / 2);
-
+	if (type == 1) {
+		Animation = 3;
+		x = x + (Xsize / 2);
+		y = y + (Ysize / 2);
+		Xsize = 59, Ysize = 47;
+		x = x - (Xsize / 2);
+		y = y - (Ysize / 2);
+	}
 }
 
 bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
 {
-	if (Animation == 2 && hp <= 0) {
-		Death();
+	InTimer += DeltaTime;
+
+	if (Animation == 0 && hp == 0) {
+	return true;
 	}
-	else if (Animation == 0 && hp == 0) {
-		return true;
+
+	if (type == 1) { // 파리
+		if (Animation == 2 && hp <= 0) {
+			Death();
+		}
 	}
+	else if (type == 2) { // 디그다?
+
+	}
+
 	return false;
 }
-
 
 void MONSTER::Draw(HDC hDC) // 그리기 함수
 {
@@ -178,10 +225,37 @@ void MONSTER::Draw(HDC hDC) // 그리기 함수
 			}
 		}
 		else {
-			IMGfly[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
-			Animation++;
+			IMGfly[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 			if (Animation > 13) {
 				Animation = 0;
+			}
+		}
+	}
+	else if (type == 2) {
+		if (hp > 0) {
+			if (Animation == 1) {
+				IMGparabite[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+			}
+			else if (Animation == 2) {
+				IMGparabite[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+				if (InTimer >= 0.5f && InTimer < 1000.0f) {
+					Animation++;
+				}
+			else if (InTimer >= 1000.5f) {
+					Animation--;
+				}
+			}
+			else if (Animation == 3) {
+				IMGparabite[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+			}
+			else if (Animation == 4) {
+				IMGparabite[Animation--].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+			}
+			else {
+				IMGparabite[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+				if (Animation > 7) {
+					Animation = 5;
+				}
 			}
 		}
 	}
