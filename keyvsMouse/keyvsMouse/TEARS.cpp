@@ -34,7 +34,7 @@ TEARS::TEARS(int Px, int Py) { // 생성자
 	TearRect.top = y - (height/2);
 	TearRect.right = x + (width/2) + size;
 	TearRect.bottom = y + (height/2) + size;
-	speed = 300.0f;          // 눈물 속도 (픽셀/초 기준)
+	speed = 1000.0f;          // 눈물 속도 (픽셀/초 기준)
 	maxDistance = 600.0f;    // 최대 이동 거리
 	traveledDistance = 0.0f;
 	isActive = true;         // 꼭 true로 초기화!
@@ -88,10 +88,19 @@ void TEARS::Draw(HDC nhDC, HDC nhMemDC) {
 	SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 }
 
+void TEARS::DrawBoom(HDC nhDC, HDC nhMemDC) {
+	SetTearRect();
+	for (int i = 0; i < 15; i++) {
+		HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, TearsBoomBitMap[i]); // 0번 비트맵 사용
+		TransparentBlt(nhDC, TearRect.left, TearRect.top, (TearRect.right - TearRect.left), (TearRect.bottom - TearRect.top), nhMemDC, 0, 0, 64, 1, RGB(255, 200, 200)); // 눈물 그리기
+		SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	}
+};
 
 bool TEARS::IsOutOfRange() { // 거리 초과 함수
 	return !isActive;
 };
+
 
 
 

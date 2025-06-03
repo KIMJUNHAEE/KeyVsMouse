@@ -7,12 +7,14 @@
 #include "PLAYER1.h"
 #include "MONSTER.h"
 #include "TEARS.h"
+#include "RoundTear.h"
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
 
 int MoveCheck = 0; // 0: 정지, 1: 위, 2: 아래, 3: 왼쪽, 4: 오른쪽
 int MoveCount = 0; // 움직임 카운트 (애니메이션 프레임을 위한 카운트)
+
 float dx; // 플레이어-몬스터 거리 x
 float dy; // 플레이어-몬스터 거리 y
 float Length; // 플레이어-몬스터 거리
@@ -20,6 +22,11 @@ float MinLength = 10000;// 플레이어-몬스터 최소 거리
 float stocktime = 1.0f;
 float closestX = 0, closestY = 0;
 float minDist = FLT_MAX;
+int BoomX = 0;
+int BoomY = 0;
+bool BoomCheck = FALSE;
+void DrawBoom(HDC nhDC, HDC nhMemDC, int x, int y);
+HBITMAP TearsBoomBitMap[15];
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -61,7 +68,6 @@ int WINAPI WinMain(HINSTANCE hlnstance, HINSTANCE hPrevlnstance, LPSTR lpszCmdPa
 	return Message.wParam;
 }
 
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -73,7 +79,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static RECT ViewRect;
 	static HPEN hPen, hOldPen;
 	static HBRUSH hBrush, hOldBrush;
-	static PLAYER1 player(10, 500, 500, 5, 3.0f, 10, 2, 0, down); // 생성자
+	static PLAYER1 player(10, 500, 500, 5, 1.0f, 10, 2, 0, down); // 생성자
+	static RoundTear Rt(player.Tx,player.Ty); // 눈물 생성자
 
 	static POINT cursor; // 마우스 커서 좌표
 	static float DeltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
@@ -85,6 +92,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 	switch (iMessage) {
 	case WM_CREATE:
+
+		TCHAR Tb_filePath[256];
+		for (int i = 0; i < 15; i++) {
+			_stprintf_s(Tb_filePath, _T("P1_graphics/Tb_%d.bmp"), i + 1); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
+			TearsBoomBitMap[i] = (HBITMAP)LoadImage(NULL, Tb_filePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+			if (TearsBoomBitMap[i] == NULL) {
+				MessageBox(NULL, _T("비트맵 로딩 실패!"), _T("오류"), MB_OK);
+			}
+		}
+
 		ImageCreate();
 		GetClientRect(hWnd, &ViewRect);
 
@@ -107,7 +124,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		// Mem2DC 에 몬스터 더블버퍼링
 		hMem2DC = CreateCompatibleDC(hDC); // hMem2DC에다가 다 그림
 		hMem1DC = CreateCompatibleDC(hMem2DC); // hMem1DC는 플레이어 버퍼용, 1이랑 2 연결시켜주는 줄
-		hMem3DC = CreateCompatibleDC(hMem2DC); // hMem3DC는 눈물용, 2랑 3 연결시켜주는 줄
 		hBitmap = CreateCompatibleBitmap(hDC, WINDOW_WIDTH, WINDOW_HEIGHT);
 		hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap);
 		FillRect(hMem2DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
@@ -140,14 +156,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		else if( MoveCheck == 8) {
 			player.RMDraw(hMem2DC, hMem1DC, MoveCount);
 		}
+		
+
+		Rt.Update(player.Tx, player.Ty, DeltaTime); 
+		Rt.SetRtTearRect();
+		Rt.Draw(hMem2DC, hMem1DC); // Rt 눈물 그리기
+
 
 		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
 			monster.Draw(hMem2DC);
 		}
 
 		for (auto& tear : tears) {
-			tear.Draw(hMem2DC, hMem3DC);
+			tear.Draw(hMem2DC, hMem1DC);
 		}
+
+		if (BoomCheck) {
+			DrawBoom(hMem2DC, hMem1DC, BoomX, BoomY);
+			BoomCheck = FALSE;
+		}
+		
 		
 		BitBlt(hDC, ViewRect.left, ViewRect.top, ViewRect.right, ViewRect.bottom, hMem2DC, 0, 0, SRCCOPY);
 
@@ -169,33 +197,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		int ShootCheck = player.ShootTime(DeltaTime); // 플레이어 눈물발사 시간 체크, 기본 3초마다 쏨
 
 		if (ShootCheck == 1) {
-			if (monsters.empty()) break;
 			TEARS tear(player.Tx, player.Ty);
-
-			minDist = FLT_MAX;
-			bool foundTarget = false;
-			for (auto& monster : monsters) {
-				float dx = monster.GetX() - player.Tx;
-				float dy = monster.GetY() - player.Ty;
-				float dist = sqrt(dx * dx + dy * dy);
-				if (dist < minDist) {
-					minDist = dist;
-					closestX = monster.GetX();
-					closestY = monster.GetY();
-					foundTarget = true;
-				}
-			}
-
-			if (foundTarget) {
-				tear.Shoot(closestX, closestY);
-				tears.push_back(tear);
-			}
+			tear.Shoot(Rt.x, Rt.y);
+			tears.push_back(tear);
+		
 		}
 
 		// 눈물 이동 및 제거
 		for (auto tear = tears.begin(); tear != tears.end(); ) {
 			tear->Update(DeltaTime);
 			if (tear->IsOutOfRange()) {
+				BoomX = tear->x;
+				BoomY = tear->y;
+				BoomCheck = TRUE;
 				tear = tears.erase(tear);
 			}
 			else {
@@ -262,6 +276,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			MoveCheck = 0; // 멈춤
 		}
 
+		SHORT h = GetAsyncKeyState('H');
+		SHORT j = GetAsyncKeyState('J');
+
+		bool H = h & 0x8000;
+		bool J = j & 0x8000;
+
+		// 회전 방향 설정
+		if (H) {
+			Rt.rotationDir = -1; // 반시계 방향
+		}
+		else if (J) {
+			Rt.rotationDir = 1; // 시계 방향
+		}
+		else {
+			Rt.rotationDir = 0; // 멈춤
+		}
+
 		// 애니메이션 프레임 카운트 증가
 		if (MoveCheck != 0) {
 			MoveCount++;
@@ -273,14 +304,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	case WM_KEYDOWN:
-
-		
+	
 		break;
 	case WM_KEYUP:
 
-		
 		break;
-
 	case WM_RBUTTONDOWN:
 		Mtype++;
 		break;
@@ -305,3 +333,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	}
 	return (DefWindowProc(hWnd, iMessage, wParam, lParam));
 }
+
+void DrawBoom(HDC nhDC, HDC nhMemDC, int x, int y) {
+	
+	for (int i = 0; i < 15; i++) {
+		HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, TearsBoomBitMap[i]); // 0번 비트맵 사용
+		TransparentBlt(nhDC, x-8, y-8, 64, 64, nhMemDC, 0, 0, 64, 64, RGB(255, 200, 200)); // 눈물 그리기
+		SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기aaa
+	}
+
+};

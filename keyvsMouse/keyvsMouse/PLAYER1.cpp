@@ -12,7 +12,7 @@ PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange
 	size = nsize;
 	Act = nAct;
 	view = nview;
-
+	rad = 50;
 	for (int i = 0; i < 6; i++) {
 		// 각 이미지 파일 경로를 넣어야 합니다
 		TCHAR filePath[256];
@@ -73,24 +73,6 @@ void PLAYER1::SetPct(int nPct) { // 패시브 아이템 시드값 배열 설정
 
 };
 
-void PLAYER1::SetView(int nview) { // 플레이어 시선 설정
-	view = nview;
-
-	if (view == left) {
-
-	}
-	else if (view == right) {
-
-	}
-	else if (view == up) {
-
-	}
-	else if (view == down) {
-
-	}
-
-};
-
 void PLAYER1::SetHeadRect() { // 플레이어 머리 그리기용 좌표
 
 	HeadRect.left = x;
@@ -110,11 +92,9 @@ void PLAYER1::SetBodyRect() { // 플레이어 몸통 그리기용 좌표
 };
 
 void PLAYER1::SetTarget() { // 플레이어 타겟 좌표 설정
-	Tx = (BodyRect.right + BodyRect.left) / 2; // 타겟 X좌표
-	Ty = BodyRect.top; // 타겟 Y좌표
+	Tx = (HeadRect.right + HeadRect.left) / 2; // 타겟 X좌표
+	Ty = (HeadRect.top + BodyRect.bottom) / 2; // 타겟 Y좌표
 };
-
-
 
 void PLAYER1::SetCamera() { // 카메라 업데이트
 	Came.left = x - 500;
@@ -122,11 +102,6 @@ void PLAYER1::SetCamera() { // 카메라 업데이트
 	Came.top = y - 500;
 	Came.bottom = y + 500;
 };
-
-void SetBitMap(HBITMAP nhBitmap, int nindex) { // 플레이어 비트맵 설정
-
-}
-
 
 // 이동함수
 void PLAYER1::MoveLeft() { // 좌로 이동 함수
