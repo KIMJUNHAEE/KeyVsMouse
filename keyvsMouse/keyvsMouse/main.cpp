@@ -81,8 +81,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static std::vector<MONSTER> monsters; // 몬스터 벡터 선언
 	static std::vector<TEARS> tears; // 눈물 백터 선언
 
-	switch (iMessage) {
+	static int Mtype = 0;
 
+	switch (iMessage) {
 	case WM_CREATE:
 		ImageCreate();
 		GetClientRect(hWnd, &ViewRect);
@@ -104,7 +105,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hDC = BeginPaint(hWnd, &ps);
 		
 		// Mem2DC 에 몬스터 더블버퍼링
-
 		hMem2DC = CreateCompatibleDC(hDC); // hMem2DC에다가 다 그림
 		hMem1DC = CreateCompatibleDC(hMem2DC); // hMem1DC는 플레이어 버퍼용, 1이랑 2 연결시켜주는 줄
 		hMem3DC = CreateCompatibleDC(hMem2DC); // hMem3DC는 눈물용, 2랑 3 연결시켜주는 줄
@@ -281,11 +281,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		
 		break;
 
+	case WM_RBUTTONDOWN:
+		Mtype++;
+		break;
+
 	case WM_LBUTTONDOWN:
 		monsters.emplace_back();
 		monsters.back().SetSpot(cursor.x, cursor.y);
 		monsters.back().SetRect();
-		monsters.back().SetMonster(1);
+		monsters.back().SetMonster((Mtype % 2) + 1);
 
 		break;
 	case WM_MOUSEMOVE:

@@ -75,7 +75,7 @@ void MONSTER::SetRect()
 
 int MONSTER::GetX()
 {
-	return (x+Xsize) / 2;
+	return (x + Xsize) / 2;
 }
 int MONSTER::GetY()
 {
@@ -93,6 +93,20 @@ void MONSTER::SetMonster(int ntype)
 		DropItem = 1;
 		Animation = 1;
 		break;
+	case 2:
+		type = 2;
+		Xsize = 32, Ysize = 32;
+		hp = 400, power = 30, Mspeed = 30, Aspeed = 1.0f, range = 0;
+		DropItem = 1;
+		Animation = 1;
+		break;
+	case 3:
+		type = 3;
+		Xsize = 64; Ysize = 128;
+		hp = 1000, power = 50, Mspeed = 1500, Aspeed = 1.0f, range = 0;
+		DropItem = 1;
+		Animation = 1;
+		break;
 	default:
 		break;
 	}
@@ -103,7 +117,22 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 	if (hp > 0) {
 		RECT lprcDest;
 		if (IntersectRect(&lprcDest, &rect, &head) || IntersectRect(&lprcDest, &rect, &body)) {
-			Death();
+			if (type == 1) { // 파리
+				Death();
+			}
+			else if (type == 2) { // 디그다?
+				if (Animation == 3 || Animation == 4) {
+					Animation = 5;
+					InTimer = 0.0f;
+				}
+			}
+			else if (type == 3 && Animation == 1) {
+				x = head.left;
+				y = head.top - Ysize;
+			}
+			return;
+		}
+		if (type == 3 && Animation != 1) {
 			return;
 		}
 
@@ -116,6 +145,34 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 		dy = player1.y - y;
 		distance = sqrt(dx * dx + dy * dy); // 플레이어와의 거리
 
+		if (type == 2) {
+			if (Animation == 1) {
+				if (distance < 200.0f) {
+					Animation++;
+					InTimer = 0.0f;
+				}
+			}
+			else if (Animation == 2) {
+				if (InTimer <= 1000.0f && distance > 200.0f) {
+					InTimer = 1000.0f;
+				}
+			}
+			else if (Animation == 3 || Animation == 4) {
+				if (distance > 200.0f) {
+					Animation = 2;
+					InTimer = 1000.0f;
+				}
+			}
+			else if (Animation >= 5 && Animation <= 7) {
+				if (InTimer <= 3.0f) {
+					return;
+				}
+				else {
+					Animation = 2;
+					InTimer = 0.0f;
+				}
+			}
+		}
 		if (distance > 0.0001f) {
 			step = Mspeed * DeltaTime;
 			MoveX = (dx / distance) * step;
@@ -138,27 +195,47 @@ void MONSTER::Hit(int power) // 피격 함수
 
 void MONSTER::Death() // 사망 함수
 {
-	Animation = 3;
 	hp = 0;
-	x = x + (Xsize / 2);
-	y = y + (Ysize / 2);
-	Xsize = 59, Ysize = 47;
-	x = x - (Xsize / 2);
-	y = y - (Ysize / 2);
-
+	if (type == 1) {
+		Animation = 3;
+		x = x + (Xsize / 2);
+		y = y + (Ysize / 2);
+		Xsize = 59, Ysize = 47;
+		x = x - (Xsize / 2);
+		y = y - (Ysize / 2);
+	}
 }
 
 bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
 {
-	if (Animation == 2 && hp <= 0) {
-		Death();
-	}
-	else if (Animation == 0 && hp == 0) {
+	InTimer += DeltaTime;
+
+	if (Animation == 0 && hp == 0) {
 		return true;
 	}
+
+	if (type == 1) { // 파리
+		if (Animation == 2 && hp <= 0) {
+			Death();
+		}
+	}
+	else if (type == 3) { // 엄마
+		if (Animation == 1) {
+			Ysize = 64;
+		}
+		if (Animation == 2 || Animation == 6) {
+			Ysize = 64;
+		}
+		else if (Animation == 3 || Animation == 5) {
+			Ysize = 128;
+		}
+		else if (Animation == 4) {
+			Ysize = 174;
+		}
+	}
+
 	return false;
 }
-
 
 void MONSTER::Draw(HDC hDC) // 그리기 함수
 {
@@ -178,10 +255,61 @@ void MONSTER::Draw(HDC hDC) // 그리기 함수
 			}
 		}
 		else {
-			IMGfly[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
-			Animation++;
+			IMGfly[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 			if (Animation > 13) {
 				Animation = 0;
+			}
+		}
+	}
+	else if (type == 2) {
+		if (hp > 0) {
+			if (Animation == 1) {
+				IMGparabite[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+			}
+			else if (Animation == 2) {
+				IMGparabite[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+				if (InTimer >= 0.5f && InTimer < 1000.0f) {
+					Animation++;
+				}
+			else if (InTimer >= 1000.5f) {
+					Animation--;
+				}
+			}
+			else if (Animation == 3) {
+				IMGparabite[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+			}
+			else if (Animation == 4) {
+				IMGparabite[Animation--].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+			}
+			else {
+				IMGparabite[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+				if (Animation > 7) {
+					Animation = 5;
+				}
+			}
+		}
+	}
+	else if (type == 3) {
+		if (hp > 0) {
+			if (InTimer >= 0.5f) {
+				if (Animation >= 1 && Animation < 7) {
+					Animation++;
+					InTimer = 0.0f;
+				}
+				if (Animation == 7) {
+					Animation = 1;
+					InTimer = 0.0f;
+				}
+			}
+			int cnt = Animation;
+			if (Animation == 5) {
+				cnt = 3;
+			}
+			else if (Animation == 6) {
+				cnt = 2;
+			}
+			if (Animation != 1) {
+				IMGmom[cnt].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 			}
 		}
 	}
