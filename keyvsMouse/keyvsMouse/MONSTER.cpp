@@ -75,7 +75,7 @@ void MONSTER::SetRect()
 
 int MONSTER::GetX()
 {
-	return (x+Xsize) / 2;
+	return (x + Xsize) / 2;
 }
 int MONSTER::GetY()
 {
@@ -100,6 +100,13 @@ void MONSTER::SetMonster(int ntype)
 		DropItem = 1;
 		Animation = 1;
 		break;
+	case 3:
+		type = 3;
+		Xsize = 64; Ysize = 128;
+		hp = 1000, power = 50, Mspeed = 1500, Aspeed = 1.0f, range = 0;
+		DropItem = 1;
+		Animation = 1;
+		break;
 	default:
 		break;
 	}
@@ -119,6 +126,13 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 					InTimer = 0.0f;
 				}
 			}
+			else if (type == 3 && Animation == 1) {
+				x = head.left;
+				y = head.top - Ysize;
+			}
+			return;
+		}
+		if (type == 3 && Animation != 1) {
 			return;
 		}
 
@@ -143,6 +157,12 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 					InTimer = 1000.0f;
 				}
 			}
+			else if (Animation == 3 || Animation == 4) {
+				if (distance > 200.0f) {
+					Animation = 2;
+					InTimer = 1000.0f;
+				}
+			}
 			else if (Animation >= 5 && Animation <= 7) {
 				if (InTimer <= 3.0f) {
 					return;
@@ -153,7 +173,6 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 				}
 			}
 		}
-
 		if (distance > 0.0001f) {
 			step = Mspeed * DeltaTime;
 			MoveX = (dx / distance) * step;
@@ -192,7 +211,7 @@ bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
 	InTimer += DeltaTime;
 
 	if (Animation == 0 && hp == 0) {
-	return true;
+		return true;
 	}
 
 	if (type == 1) { // 파리
@@ -200,8 +219,19 @@ bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
 			Death();
 		}
 	}
-	else if (type == 2) { // 디그다?
-
+	else if (type == 3) { // 엄마
+		if (Animation == 1) {
+			Ysize = 64;
+		}
+		if (Animation == 2 || Animation == 6) {
+			Ysize = 64;
+		}
+		else if (Animation == 3 || Animation == 5) {
+			Ysize = 128;
+		}
+		else if (Animation == 4) {
+			Ysize = 174;
+		}
 	}
 
 	return false;
@@ -256,6 +286,30 @@ void MONSTER::Draw(HDC hDC) // 그리기 함수
 				if (Animation > 7) {
 					Animation = 5;
 				}
+			}
+		}
+	}
+	else if (type == 3) {
+		if (hp > 0) {
+			if (InTimer >= 0.5f) {
+				if (Animation >= 1 && Animation < 7) {
+					Animation++;
+					InTimer = 0.0f;
+				}
+				if (Animation == 7) {
+					Animation = 1;
+					InTimer = 0.0f;
+				}
+			}
+			int cnt = Animation;
+			if (Animation == 5) {
+				cnt = 3;
+			}
+			else if (Animation == 6) {
+				cnt = 2;
+			}
+			if (Animation != 1) {
+				IMGmom[cnt].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 			}
 		}
 	}
