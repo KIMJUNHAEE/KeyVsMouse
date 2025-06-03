@@ -17,6 +17,9 @@ float dx; // 플레이어-몬스터 거리 x
 float dy; // 플레이어-몬스터 거리 y
 float Length; // 플레이어-몬스터 거리
 float MinLength = 10000;// 플레이어-몬스터 최소 거리
+float stocktime = 1.0f;
+float closestX = 0, closestY = 0;
+float minDist = FLT_MAX;
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -62,7 +65,7 @@ int WINAPI WinMain(HINSTANCE hlnstance, HINSTANCE hPrevlnstance, LPSTR lpszCmdPa
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
-	HDC hDC, hMem1DC, hMem2DC;
+	HDC hDC, hMem1DC, hMem2DC, hMem3DC;
 	HBITMAP OldBit[3];
 	static HBITMAP BackGroundhBitmap;
 	HBITMAP hBitmap, hOldBitmap;
@@ -99,16 +102,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT: {
 		hDC = BeginPaint(hWnd, &ps);
-
+		
 		// Mem2DC 에 몬스터 더블버퍼링
 
 		hMem2DC = CreateCompatibleDC(hDC); // hMem2DC에다가 다 그림
 		hMem1DC = CreateCompatibleDC(hMem2DC); // hMem1DC는 플레이어 버퍼용, 1이랑 2 연결시켜주는 줄
+		hMem3DC = CreateCompatibleDC(hMem2DC); // hMem3DC는 눈물용, 2랑 3 연결시켜주는 줄
 		hBitmap = CreateCompatibleBitmap(hDC, WINDOW_WIDTH, WINDOW_HEIGHT);
 		hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap);
 		FillRect(hMem2DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
 		
-
+		
 		if (MoveCheck == 0) {
 			player.Draw(hMem2DC, hMem1DC);
 		}
@@ -124,10 +128,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		else if (MoveCheck == 4) {
 			player.RMDraw(hMem2DC, hMem1DC, MoveCount);
 		}
+		else if (MoveCheck == 5) {
+			player.LMDraw(hMem2DC, hMem1DC, MoveCount);
+		}
+		else if (MoveCheck == 6) {
+			player.RMDraw(hMem2DC, hMem1DC, MoveCount);
+		}
+		else if (MoveCheck == 7) {
+			player.LMDraw(hMem2DC, hMem1DC, MoveCount);
+		}
+		else if( MoveCheck == 8) {
+			player.RMDraw(hMem2DC, hMem1DC, MoveCount);
+		}
+
 		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
 			monster.Draw(hMem2DC);
 		}
 
+		for (auto& tear : tears) {
+			tear.Draw(hMem2DC, hMem3DC);
+		}
+		
 		BitBlt(hDC, ViewRect.left, ViewRect.top, ViewRect.right, ViewRect.bottom, hMem2DC, 0, 0, SRCCOPY);
 
 		SelectObject(hMem2DC, hOldBitmap);
@@ -148,28 +169,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		int ShootCheck = player.ShootTime(DeltaTime); // 플레이어 눈물발사 시간 체크, 기본 3초마다 쏨
 
 		if (ShootCheck == 1) {
-			static TEARS tear(player.Tx,player.Ty); // 눈물 객체 생성
+			if (monsters.empty()) break;
+			TEARS tear(player.Tx, player.Ty);
 
-			for (auto monster = monsters.begin(); monster != monsters.end();) {
-				dx = monster->GetX() - player.Tx;
-				dy = monster->GetY() - player.Ty;
-				Length = sqrt(dx * dx + dy * dy);
-
-				if (Length <= MinLength) {
-					MinLength = Length;
-				}
-			}
-			
-			for (auto monster = monsters.begin(); monster != monsters.end();) {
-				dx = monster->GetX() - player.Tx;
-				dy = monster->GetY() - player.Ty;
-				Length = sqrt(dx * dx + dy * dy);
-
-				if (Length <= MinLength) {
-					tear.Shoot(monster->GetX(), monster->GetY());
+			minDist = FLT_MAX;
+			bool foundTarget = false;
+			for (auto& monster : monsters) {
+				float dx = monster.GetX() - player.Tx;
+				float dy = monster.GetY() - player.Ty;
+				float dist = sqrt(dx * dx + dy * dy);
+				if (dist < minDist) {
+					minDist = dist;
+					closestX = monster.GetX();
+					closestY = monster.GetY();
+					foundTarget = true;
 				}
 			}
 
+			if (foundTarget) {
+				tear.Shoot(closestX, closestY);
+				tears.push_back(tear);
+			}
+		}
+
+		// 눈물 이동 및 제거
+		for (auto tear = tears.begin(); tear != tears.end(); ) {
+			tear->Update(DeltaTime);
+			if (tear->IsOutOfRange()) {
+				tear = tears.erase(tear);
+			}
+			else {
+				tear++;
+			}
 		}
 
 		POINT point = { player.Tx, player.Ty };
@@ -184,55 +215,70 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 		}
 
-		
+		SHORT w = GetAsyncKeyState('W');
+		SHORT s = GetAsyncKeyState('S');
+		SHORT a = GetAsyncKeyState('A');
+		SHORT d = GetAsyncKeyState('D');
+
+		bool W = w & 0x8000;
+		bool S = s & 0x8000;
+		bool A = a & 0x8000;
+		bool D = d & 0x8000;
+
+		// 방향 우선 순위: 대각선 > 단일 방향
+		if (W && A) {
+			player.MoveUpLeft();     // 좌상
+			MoveCheck = 5;
+		}
+		else if (W && D) {
+			player.MoveUpRight();    // 우상
+			MoveCheck = 6;
+		}
+		else if (S && A) {
+			player.MoveDownLeft();   // 좌하
+			MoveCheck = 7;
+		}
+		else if (S && D) {
+			player.MoveDownRight();  // 우하
+			MoveCheck = 8;
+		}
+		else if (W) {
+			player.MoveUp();
+			MoveCheck = 1;
+		}
+		else if (S) {
+			player.MoveDown();
+			MoveCheck = 2;
+		}
+		else if (A) {
+			player.MoveLeft();
+			MoveCheck = 3;
+		}
+		else if (D) {
+			player.MoveRight();
+			MoveCheck = 4;
+		}
+		else {
+			MoveCheck = 0; // 멈춤
+		}
+
+		// 애니메이션 프레임 카운트 증가
+		if (MoveCheck != 0) {
+			MoveCount++;
+			if (MoveCount >= 9) MoveCount = 0;
+		}
 
 
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 	}
 	case WM_KEYDOWN:
-		if (wParam == 'W') {
-			player.MoveUp();
-			MoveCheck = 1;
-			MoveCount++;
-			if (MoveCount >= 9) MoveCount = 0;
-		}
-		else if (wParam == 'S') {
-			player.MoveDown();
-			MoveCheck = 2;
-			MoveCount++;
-			if (MoveCount >= 9) MoveCount = 0;
-		}
-		else if (wParam == 'A') {
-			player.MoveLeft();
-			MoveCheck = 3;
-			MoveCount++;
-			if (MoveCount >= 9) MoveCount = 0;
-		}
-		else if (wParam == 'D') {
-			player.MoveRight();
-			MoveCheck = 4;
-			MoveCount++;
-			if (MoveCount >= 9) MoveCount = 0;
-		}
+
+		
 		break;
 	case WM_KEYUP:
-		if (wParam == 'W') {
-			MoveCheck = 0;
-			MoveCount = 0;
-		}
-		else if (wParam == 'S') {
-			MoveCheck = 0;
-			MoveCount = 0;
-		}
-		else if (wParam == 'A') {
-			MoveCheck = 0;
-			MoveCount = 0;
-		}
-		else if (wParam == 'D') {
-			MoveCheck = 0;
-			MoveCount = 0;
-		}
+
+		
 		break;
 
 	case WM_LBUTTONDOWN:

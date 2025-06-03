@@ -51,6 +51,10 @@ public:
 	void MoveRight(); // 우로 이동 함수
 	void MoveUp(); // 위로 이동 함수
 	void MoveDown(); // 아래로 이동 함수
+	void MoveUpLeft(); // 좌상단 대각선 이동 함수
+	void MoveUpRight(); // 우상단 대각선 이동 함수
+	void MoveDownLeft(); // 좌하단 대각선 이동 함수
+	void MoveDownRight(); // 우하단 대각선 이동 함수
 
 	// 부가요소 함수
 	void Update(float deltaTime); // 위치 업데이트
@@ -59,6 +63,7 @@ public:
 	void UMDraw(HDC nhDC, HDC nMemDC, int nCount); // 위로 움직임 그리기
 	void RMDraw(HDC nhDC, HDC nMemDC, int nCount); // 오른쪽으로 움직임 그리기
 	void LMDraw(HDC nhDC, HDC nMemDC, int nCount); // 왼쪽으로 움직임 그리기
+	void ULMDraw(HDC nhDC, HDC nMemDC, int nCount); // 좌상단 대각선 움직임 그리기
 	int ShootTime(float deltaTime); // 공격 타이머 업데이트
 
 };

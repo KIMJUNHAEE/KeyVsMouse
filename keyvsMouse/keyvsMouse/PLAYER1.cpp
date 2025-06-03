@@ -165,6 +165,49 @@ void PLAYER1::MoveDown() { // 아래로 이동 함수
 	}
 };
 
+void PLAYER1::MoveUpLeft() { // 좌상단 대각선 이동 함수
+	if ((HeadRect.left - Mspeed >= 0) && (HeadRect.top - Mspeed >= 0)) {
+		x -= Mspeed;
+		y -= Mspeed;
+		SetHeadRect();
+		SetBodyRect();
+		SetCamera();
+	}
+}; 
+
+void PLAYER1::MoveUpRight() { // 우상단 대각선 이동 함수
+	if ((HeadRect.right + Mspeed <= 1000) && (HeadRect.top - Mspeed >= 0)) {
+		x += Mspeed;
+		y -= Mspeed;
+		SetHeadRect();
+		SetBodyRect();
+		SetCamera();
+	}
+
+};
+
+void PLAYER1::MoveDownLeft() { // 좌하단 대각선 이동 함수
+	if ((HeadRect.left - Mspeed >= 0) && (BodyRect.bottom + Mspeed <= 1000)) {
+		x -= Mspeed;
+		y += Mspeed;
+		SetHeadRect();
+		SetBodyRect();
+		SetCamera();
+	}
+}; 
+
+void PLAYER1::MoveDownRight() {// 우하단 대각선 이동 함수
+	if ((HeadRect.right + Mspeed <= 1000) && (BodyRect.bottom + Mspeed <= 1000)) {
+		x += Mspeed;
+		y += Mspeed;
+		SetHeadRect();
+		SetBodyRect();
+		SetCamera();
+	}
+}; 
+
+
+
 // 부가요소 함수
 void PLAYER1::Update(float deltaTime) { // 내부 타이머 업데이트 함수
 	InTimer += deltaTime;
@@ -359,6 +402,7 @@ void PLAYER1::LMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 왼쪽으로 움직임 그리
 
 	SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 };
+
 
 int PLAYER1::ShootTime(float deltaTime) { // 공격 타이머 업데이트 함수
 	InTimer += deltaTime;
