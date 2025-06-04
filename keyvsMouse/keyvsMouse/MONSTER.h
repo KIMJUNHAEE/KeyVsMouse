@@ -20,6 +20,7 @@ private:
 	int view; // 시선
 	float InTimer; // 내부 타이머
 	int Animation; // 애니메이션 그림 번호
+	bool Intersect; // 교차 여부
 
 public:
 
@@ -47,7 +48,7 @@ public:
 	void SetMonster(int type);
 
 	// 이동함수
-	void MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime); // 플레이어 위치 이동 함수
+	int MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime); // 플레이어 위치 이동 함수
 	void MoveToMachine(POINT buliding); // 기물 위치 근처 이동 함수
 
 	// 행동함수

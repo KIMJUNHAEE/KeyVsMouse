@@ -9,7 +9,6 @@ enum DIRECTION {
 class PLAYER1
 {
 private:
-	int hp; // 플레이어 체력
 	int x, y; // 플레이어 머리 좌상단 좌표
 	int Mspeed; // 이동속도
 	float Aspeed; // 공격속도
@@ -26,6 +25,7 @@ public:
 	PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange, int nsize, int nAct, int nview); // 생성자
 	~PLAYER1(); // 소멸자
 
+	int hp; // 플레이어 체력
 	int Tx, Ty; // 플레이어 타겟 좌표
 	int Damage; // 플레이어 공격력
 	RECT HeadRect; // 플레이어 머리 그리기용 좌표 

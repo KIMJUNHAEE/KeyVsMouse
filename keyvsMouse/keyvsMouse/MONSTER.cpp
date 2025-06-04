@@ -18,6 +18,7 @@ MONSTER::MONSTER() // 디폴트 몬스터 생성자
 	rect = { 0,0,0,0 };
 
 	Animation = 0;
+	Intersect = false;
 }
 
 MONSTER::~MONSTER() // 몬스터 소멸자
@@ -96,7 +97,7 @@ void MONSTER::SetMonster(int ntype)
 	case 2:
 		type = 2;
 		Xsize = 32, Ysize = 32;
-		hp = 400, power = 30, Mspeed = 30, Aspeed = 1.0f, range = 0;
+		hp = 400, power = 20, Mspeed = 30, Aspeed = 1.0f, range = 0;
 		DropItem = 1;
 		Animation = 1;
 		break;
@@ -112,13 +113,14 @@ void MONSTER::SetMonster(int ntype)
 	}
 }
 
-void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime) // 플레이어의 좌표를 받아 이동하는 함수
+int MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime) // 플레이어의 좌표를 받아 이동하는 함수
 {
 	if (hp > 0) {
 		RECT lprcDest;
 		if (IntersectRect(&lprcDest, &rect, &head) || IntersectRect(&lprcDest, &rect, &body)) {
 			if (type == 1) { // 파리
 				Death();
+				return power;
 			}
 			else if (type == 2) { // 디그다?
 				if (Animation == 3 || Animation == 4) {
@@ -126,13 +128,20 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 					InTimer = 0.0f;
 				}
 			}
-			return;
+			if (Intersect) {
+				return 0;
+			}
+			Intersect = true;
+			return power;
+		}
+		else {
+			Intersect = false;
 		}
 
 		if (type == 3 && Animation == 1) {
 			x = (head.left + head.right) / 2 - 64;
-			y = head.top - Ysize;
-			return;
+			y = head.top - (Ysize * 2);
+			return 0;
 		}
 
 		float dx, dy;
@@ -164,7 +173,7 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 			}
 			else if (Animation >= 5 && Animation <= 7) {
 				if (InTimer <= 3.0f) {
-					return;
+					return 0;
 				}
 				else {
 					Animation = 2;
@@ -181,6 +190,7 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 		}
 		SetRect();
 	}
+	return 0;
 }
 
 void MONSTER::MoveToMachine(POINT buliding) // 기물의 좌표를 받아 이동하는 함수
