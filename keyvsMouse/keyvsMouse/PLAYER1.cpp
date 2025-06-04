@@ -12,7 +12,7 @@ PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange
 	size = nsize;
 	Act = nAct;
 	view = nview;
-	rad = 50;
+	Damage = 200; // 기본 공격력
 	for (int i = 0; i < 6; i++) {
 		// 각 이미지 파일 경로를 넣어야 합니다
 		TCHAR filePath[256];

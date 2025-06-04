@@ -203,16 +203,32 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		
 		}
 
+		
 		// 눈물 이동 및 제거
 		for (auto tear = tears.begin(); tear != tears.end(); ) {
 			tear->Update(DeltaTime);
-			if (tear->IsOutOfRange()) {
+			tear->SetTearRect();
+			bool hit = false;
+			
+			for (auto monster = monsters.begin(); monster != monsters.end(); ) {
+				RECT ResultRect;
+				if (IntersectRect(&ResultRect, &tear->TearRect, &monster->rect)) {
+					hit = TRUE;
+					monster->hp -= player.Damage;
+					break;
+				}
+				else {
+					monster++;
+				}
+			}
+
+			if (hit||tear->IsOutOfRange()) {
 				BoomX = tear->x;
 				BoomY = tear->y;
 				BoomCheck = TRUE;
 				tear = tears.erase(tear);
-			}
-			else {
+				hit = FALSE;
+			}else {
 				tear++;
 			}
 		}
@@ -317,7 +333,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		monsters.emplace_back();
 		monsters.back().SetSpot(cursor.x, cursor.y);
 		monsters.back().SetRect();
-		monsters.back().SetMonster((Mtype % 2) + 1);
+		monsters.back().SetMonster((Mtype % 3) + 1);
 
 		break;
 	case WM_MOUSEMOVE:
@@ -339,7 +355,7 @@ void DrawBoom(HDC nhDC, HDC nhMemDC, int x, int y) {
 	for (int i = 0; i < 15; i++) {
 		HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, TearsBoomBitMap[i]); // 0번 비트맵 사용
 		TransparentBlt(nhDC, x-8, y-8, 64, 64, nhMemDC, 0, 0, 64, 64, RGB(255, 200, 200)); // 눈물 그리기
-		SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기aaa
+		SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 	}
 
 };

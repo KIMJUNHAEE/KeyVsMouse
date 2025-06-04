@@ -27,7 +27,7 @@ public:
 	~PLAYER1(); // 소멸자
 
 	int Tx, Ty; // 플레이어 타겟 좌표
-	int rad;
+	int Damage; // 플레이어 공격력
 	RECT HeadRect; // 플레이어 머리 그리기용 좌표 
 	RECT BodyRect; // 플레이어 몸통 그리기용 좌표 
 	float InTimer = 0.0f; // 내부 타이머

@@ -12,7 +12,6 @@ private:
 	int type; // 몬스터 시드값
 	int Xsize; // 몬스터 x 크기
 	int Ysize; // 몬스터 y 크기
-	int hp; // 체력
 	int power; // 공격력
 	int Mspeed; // 이동속도
 	float Aspeed; // 공격속도
@@ -20,13 +19,12 @@ private:
 	int DropItem; // 드랍되는 아이템 시드값
 	int view; // 시선
 	float InTimer; // 내부 타이머
-	
 	int Animation; // 애니메이션 그림 번호
-
-	RECT rect; // 그리기용 좌표
 
 public:
 
+	RECT rect; // 그리기용 좌표
+	int hp; // 체력
 	MONSTER(); // 디폴트 생성자
 	~MONSTER(); // 소멸자
 
