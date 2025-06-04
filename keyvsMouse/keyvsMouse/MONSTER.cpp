@@ -103,7 +103,7 @@ void MONSTER::SetMonster(int ntype)
 	case 3:
 		type = 3;
 		Xsize = 64; Ysize = 128;
-		hp = 1000, power = 50, Mspeed = 1500, Aspeed = 1.0f, range = 0;
+		hp = 1000, power = 50, Mspeed = 0, Aspeed = 1.0f, range = 0;
 		DropItem = 1;
 		Animation = 1;
 		break;
@@ -126,13 +126,12 @@ void MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime)
 					InTimer = 0.0f;
 				}
 			}
-			else if (type == 3 && Animation == 1) {
-				x = head.left;
-				y = head.top - Ysize;
-			}
 			return;
 		}
-		if (type == 3 && Animation != 1) {
+
+		if (type == 3 && Animation == 1) {
+			x = (head.left + head.right) / 2 - 64;
+			y = head.top - Ysize;
 			return;
 		}
 
@@ -223,15 +222,31 @@ bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
 		if (Animation == 1) {
 			Ysize = 64;
 		}
-		if (Animation == 2 || Animation == 6) {
-			Ysize = 64;
+		if (InTimer >= 2.0f) {
+			if (Animation == 2) {
+				Ysize = 16;
+			}
+			else if (Animation > 2 && Animation < 22) {
+				Ysize -= 8;
+			}
+			else if (Animation == 22) {
+				Ysize = 166;
+			}
 		}
-		else if (Animation == 3 || Animation == 5) {
-			Ysize = 128;
+		else {
+			if (Animation == 2) {
+				Xsize = 128;
+				Ysize = 24;
+			}
+			else if (Animation > 2 && Animation < 22) {
+				Ysize += 8;
+			}
+			else if (Animation == 22) {
+				Ysize = 174;
+			}
 		}
-		else if (Animation == 4) {
-			Ysize = 174;
-		}
+
+
 	}
 
 	return false;
@@ -291,25 +306,22 @@ void MONSTER::Draw(HDC hDC) // 그리기 함수
 	}
 	else if (type == 3) {
 		if (hp > 0) {
-			if (InTimer >= 0.5f) {
-				if (Animation >= 1 && Animation < 7) {
+			if (InTimer >= 2.0f) {
+				if (Animation == 1) {
+					InTimer = 0.0f;
+				}
+				if (Animation > 1 && Animation <= 22) {
+					Animation--;
+				}
+			}
+			else {
+				if (Animation >= 1 && Animation < 22) {
 					Animation++;
 					InTimer = 0.0f;
 				}
-				if (Animation == 7) {
-					Animation = 1;
-					InTimer = 0.0f;
-				}
-			}
-			int cnt = Animation;
-			if (Animation == 5) {
-				cnt = 3;
-			}
-			else if (Animation == 6) {
-				cnt = 2;
 			}
 			if (Animation != 1) {
-				IMGmom[cnt].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+				IMGmom[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 			}
 		}
 	}

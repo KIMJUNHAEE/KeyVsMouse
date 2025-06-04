@@ -317,7 +317,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		monsters.emplace_back();
 		monsters.back().SetSpot(cursor.x, cursor.y);
 		monsters.back().SetRect();
-		monsters.back().SetMonster((Mtype % 2) + 1);
+		monsters.back().SetMonster((Mtype % 3) + 1);
 
 		break;
 	case WM_MOUSEMOVE:
