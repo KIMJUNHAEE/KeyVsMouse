@@ -213,6 +213,14 @@ void MONSTER::Death() // 사망 함수
 		x = x - (Xsize / 2);
 		y = y - (Ysize / 2);
 	}
+	else { // 파리가 아닐때
+		Animation = 101;
+		x = x + (Xsize / 2);
+		y = y + (Ysize / 2);
+		Xsize = 64, Ysize = 64;
+		x = x - (Xsize / 2);
+		y = y - (Ysize / 2);
+	}
 }
 
 bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
@@ -224,41 +232,43 @@ bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
 	}
 
 	if (type == 1) { // 파리
-		if (Animation == 2 && hp <= 0) {
+		if ((Animation == 1 || Animation == 2) && hp <= 0) {
 			Death();
 		}
 	}
-	else if (type == 3) { // 엄마
-		if (Animation == 1) {
-			Ysize = 64;
+	else { // 파리 제외
+		if (Animation < 100 && hp <= 0) {
+			Death();
 		}
-		if (InTimer >= 2.0f) {
-			if (Animation == 2) {
-				Ysize = 16;
+		if (type == 3) { // 엄마
+			if (Animation == 1) {
+				Ysize = 64;
 			}
-			else if (Animation > 2 && Animation < 22) {
-				Ysize -= 8;
+			if (InTimer >= 2.0f) {
+				if (Animation == 2) {
+					Ysize = 16;
+				}
+				else if (Animation > 2 && Animation < 22) {
+					Ysize -= 8;
+				}
+				else if (Animation == 22) {
+					Ysize = 166;
+				}
 			}
-			else if (Animation == 22) {
-				Ysize = 166;
+			else {
+				if (Animation == 2) {
+					Xsize = 128;
+					Ysize = 24;
+				}
+				else if (Animation > 2 && Animation < 22) {
+					Ysize += 8;
+				}
+				else if (Animation == 22) {
+					Ysize = 174;
+				}
 			}
 		}
-		else {
-			if (Animation == 2) {
-				Xsize = 128;
-				Ysize = 24;
-			}
-			else if (Animation > 2 && Animation < 22) {
-				Ysize += 8;
-			}
-			else if (Animation == 22) {
-				Ysize = 174;
-			}
-		}
-
-
 	}
-
 	return false;
 }
 
@@ -286,52 +296,64 @@ void MONSTER::Draw(HDC hDC) // 그리기 함수
 			}
 		}
 	}
-	else if (type == 2) {
-		if (hp > 0) {
-			if (Animation == 1) {
-				IMGparabite[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
-			}
-			else if (Animation == 2) {
-				IMGparabite[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
-				if (InTimer >= 0.5f && InTimer < 1000.0f) {
-					Animation++;
-				}
-			else if (InTimer >= 1000.5f) {
-					Animation--;
-				}
-			}
-			else if (Animation == 3) {
-				IMGparabite[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
-			}
-			else if (Animation == 4) {
-				IMGparabite[Animation--].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
-			}
-			else {
-				IMGparabite[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
-				if (Animation > 7) {
-					Animation = 5;
-				}
+	else { // 파리가 아닐때
+		if (Animation >= 100) {
+			int cnt = Animation - 100;
+			IMGdeath[cnt].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+			Animation++;
+			if (Animation > 111) {
+				Animation = 0;
 			}
 		}
-	}
-	else if (type == 3) {
-		if (hp > 0) {
-			if (InTimer >= 2.0f) {
-				if (Animation == 1) {
-					InTimer = 0.0f;
-				}
-				if (Animation > 1 && Animation <= 22) {
-					Animation--;
+		else {
+			if (type == 2) {
+				if (hp > 0) {
+					if (Animation == 1) {
+						IMGparabite[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+					}
+					else if (Animation == 2) {
+						IMGparabite[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+						if (InTimer >= 0.5f && InTimer < 1000.0f) {
+							Animation++;
+						}
+						else if (InTimer >= 1000.5f) {
+							Animation--;
+						}
+					}
+					else if (Animation == 3) {
+						IMGparabite[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+					}
+					else if (Animation == 4) {
+						IMGparabite[Animation--].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+					}
+					else {
+						IMGparabite[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+						if (Animation > 7) {
+							Animation = 5;
+						}
+					}
 				}
 			}
-			else {
-				if (Animation >= 1 && Animation < 22) {
-					Animation++;
-					InTimer = 0.0f;
+			else if (type == 3) {
+				if (hp > 0) {
+					if (InTimer >= 2.0f) {
+						if (Animation == 1) {
+							InTimer = 0.0f;
+						}
+						if (Animation > 1 && Animation <= 22) {
+							Animation--;
+						}
+					}
+					else {
+						if (Animation >= 1 && Animation < 22) {
+							Animation++;
+							InTimer = 0.0f;
+						}
+					}
+					if (Animation != 1) {
+						IMGmom[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+					}
 				}
-			}
-			if (Animation != 1) {
-				IMGmom[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 			}
 		}
 	}
