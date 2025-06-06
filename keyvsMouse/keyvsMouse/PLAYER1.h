@@ -9,7 +9,6 @@ enum DIRECTION {
 class PLAYER1
 {
 private:
-	int hp; // 플레이어 체력
 	int x, y; // 플레이어 머리 좌상단 좌표
 	int Mspeed; // 이동속도
 	float Aspeed; // 공격속도
@@ -19,17 +18,19 @@ private:
 	int Pct[80]; // 패시브 아이템 시드 배열
 	int view; // 시선
 
-	RECT Came; // 카메라 영역 (1000,1000)
+	
 	HBITMAP P1BitMap[6]; // 플레이어 비트맵
 
 public:
 	PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange, int nsize, int nAct, int nview); // 생성자
 	~PLAYER1(); // 소멸자
 
+	int hp; // 플레이어 체력
 	int Tx, Ty; // 플레이어 타겟 좌표
 	int Damage; // 플레이어 공격력
 	RECT HeadRect; // 플레이어 머리 그리기용 좌표 
 	RECT BodyRect; // 플레이어 몸통 그리기용 좌표 
+	RECT Came; // 카메라 영역 (1000,1000)
 	float InTimer = 0.0f; // 내부 타이머
 
 	// 값 변경 함수

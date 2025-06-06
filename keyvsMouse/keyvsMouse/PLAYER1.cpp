@@ -97,10 +97,23 @@ void PLAYER1::SetTarget() { // 플레이어 타겟 좌표 설정
 };
 
 void PLAYER1::SetCamera() { // 카메라 업데이트
-	Came.left = x - 500;
-	Came.right = x + 500;
-	Came.top = y - 500;
-	Came.bottom = y + 500;
+	int camWidth = 1000;
+	int camHeight = 1000;
+
+	int newLeft = Tx - camWidth / 2;
+	int newTop = Ty - camHeight / 2;
+
+	// 카메라가 맵 밖으로 나가지 않도록 제한
+	if (newLeft < 0) newLeft = 0;
+	if (newTop < 0) newTop = 0;
+	if (newLeft + camWidth > 4000) newLeft = 4000 - camWidth;
+	if (newTop + camHeight > 4000) newTop = 4000 - camHeight;
+
+	// 최종 설정
+	Came.left = newLeft;
+	Came.top = newTop;
+	Came.right = newLeft + camWidth;
+	Came.bottom = newTop + camHeight;
 };
 
 // 이동함수
@@ -114,7 +127,7 @@ void PLAYER1::MoveLeft() { // 좌로 이동 함수
 };
 
 void PLAYER1::MoveRight() { // 우로 이동 함수
-	if (HeadRect.right + Mspeed <= 1000) {
+	if (HeadRect.right + Mspeed <= 4000) {
 		x += Mspeed;
 		SetHeadRect();
 		SetBodyRect();
@@ -132,7 +145,7 @@ void PLAYER1::MoveUp() { // 위로 이동 함수
 };
 
 void PLAYER1::MoveDown() { // 아래로 이동 함수
-	if (BodyRect.bottom + Mspeed <= 1000) {
+	if (BodyRect.bottom + Mspeed <= 4000) {
 		y += Mspeed;
 		SetHeadRect();
 		SetBodyRect();
@@ -151,7 +164,7 @@ void PLAYER1::MoveUpLeft() { // 좌상단 대각선 이동 함수
 }; 
 
 void PLAYER1::MoveUpRight() { // 우상단 대각선 이동 함수
-	if ((HeadRect.right + Mspeed <= 1000) && (HeadRect.top - Mspeed >= 0)) {
+	if ((HeadRect.right + Mspeed <= 4000) && (HeadRect.top - Mspeed >= 0)) {
 		x += Mspeed;
 		y -= Mspeed;
 		SetHeadRect();
@@ -162,7 +175,7 @@ void PLAYER1::MoveUpRight() { // 우상단 대각선 이동 함수
 };
 
 void PLAYER1::MoveDownLeft() { // 좌하단 대각선 이동 함수
-	if ((HeadRect.left - Mspeed >= 0) && (BodyRect.bottom + Mspeed <= 1000)) {
+	if ((HeadRect.left - Mspeed >= 0) && (BodyRect.bottom + Mspeed <= 4000)) {
 		x -= Mspeed;
 		y += Mspeed;
 		SetHeadRect();
@@ -172,7 +185,7 @@ void PLAYER1::MoveDownLeft() { // 좌하단 대각선 이동 함수
 }; 
 
 void PLAYER1::MoveDownRight() {// 우하단 대각선 이동 함수
-	if ((HeadRect.right + Mspeed <= 1000) && (BodyRect.bottom + Mspeed <= 1000)) {
+	if ((HeadRect.right + Mspeed <= 4000) && (BodyRect.bottom + Mspeed <= 4000)) {
 		x += Mspeed;
 		y += Mspeed;
 		SetHeadRect();

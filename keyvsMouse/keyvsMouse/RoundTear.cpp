@@ -45,7 +45,7 @@ void RoundTear::Update(int Px, int Py, float DeltaTime) { // 눈물 업데이트 함수
 void RoundTear::Draw(HDC nhDC, HDC nhMemDC) { // 눈물 그리기 함수
 	SetRtTearRect();
 	HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, RtTearBitMap);
-	TransparentBlt(nhDC, RtRect.left, RtRect.top, (RtRect.right - RtRect.left), (RtRect.bottom - RtRect.top), nhMemDC, 18, 0, 9, 9, RGB(255, 200, 200));
+	TransparentBlt(nhDC, RtRect.left, RtRect.top, (RtRect.right - RtRect.left), (RtRect.bottom - RtRect.top), nhMemDC, 18, 0, 8, 8, RGB(255, 200, 200));
 	SelectObject(nhMemDC, oldBitmap);
 }; 
 

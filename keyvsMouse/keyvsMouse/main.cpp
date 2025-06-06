@@ -9,8 +9,8 @@
 #include "TEARS.h"
 #include "RoundTear.h"
 
-#define WINDOW_WIDTH 1600
-#define WINDOW_HEIGHT 900
+#define WINDOW_WIDTH 1000
+#define WINDOW_HEIGHT 1000
 
 int MoveCheck = 0; // 0: 정지, 1: 위, 2: 아래, 3: 왼쪽, 4: 오른쪽
 int MoveCount = 0; // 움직임 카운트 (애니메이션 프레임을 위한 카운트)
@@ -25,6 +25,7 @@ float minDist = FLT_MAX;
 int BoomX = 0;
 int BoomY = 0;
 bool BoomCheck = FALSE;
+int BoomCount = 0;
 void DrawBoom(HDC nhDC, HDC nhMemDC, int x, int y);
 HBITMAP TearsBoomBitMap[15];
 
@@ -73,13 +74,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hDC, hMem1DC, hMem2DC, hMem3DC;
 	HBITMAP OldBit[3];
-	static HBITMAP BackGroundhBitmap;
+	static HBITMAP BackGroundhBitmap, HeatBitmap;
 	HBITMAP hBitmap, hOldBitmap;
 
 	static RECT ViewRect;
 	static HPEN hPen, hOldPen;
 	static HBRUSH hBrush, hOldBrush;
-	static PLAYER1 player(10, 500, 500, 5, 1.0f, 10, 2, 0, down); // 생성자
+	static PLAYER1 player(60, 500, 500, 5, 1.0f, 10, 2, 0, down); // 생성자
 	static RoundTear Rt(player.Tx,player.Ty); // 눈물 생성자
 
 	static POINT cursor; // 마우스 커서 좌표
@@ -105,7 +106,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		ImageCreate();
 		GetClientRect(hWnd, &ViewRect);
 
-
 		player.SetCamera();
 
 		TCHAR BGfilepath[256];
@@ -116,18 +116,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			return -1;
 		}
 
+		TCHAR Heartfilepath[256];
+		_stprintf_s(Heartfilepath, _T("P1_graphics/ui_hearts.bmp")); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
+		HeatBitmap = (HBITMAP)LoadImage(NULL, Heartfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		if (HeatBitmap == NULL) {
+			MessageBox(hWnd, _T("Failed to load ui_hearts image"), _T("Error"), MB_OK | MB_ICONERROR);
+			return -1;
+		}
+
+
 		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
 		break;
 	case WM_PAINT: {
 		hDC = BeginPaint(hWnd, &ps);
-		
 		// Mem2DC 에 몬스터 더블버퍼링
 		hMem2DC = CreateCompatibleDC(hDC); // hMem2DC에다가 다 그림
 		hMem1DC = CreateCompatibleDC(hMem2DC); // hMem1DC는 플레이어 버퍼용, 1이랑 2 연결시켜주는 줄
-		hBitmap = CreateCompatibleBitmap(hDC, WINDOW_WIDTH, WINDOW_HEIGHT);
+		hBitmap = CreateCompatibleBitmap(hDC, 4000, 4000); // 4000x4000 크기의 비트맵 생성
 		hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap);
-		FillRect(hMem2DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
+		//FillRect(hMem2DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
 		
+		HBITMAP oldBitmap = (HBITMAP)SelectObject(hMem1DC, BackGroundhBitmap); // 배경비트맵 사용
+		BitBlt(hMem2DC, 0, 0, 4000, 4000, hMem1DC, 0, 0, SRCCOPY); // 배경 그리기
+		SelectObject(hMem1DC, oldBitmap); // 이전 비트맵으로 되돌리기
+
 		
 		if (MoveCheck == 0) {
 			player.Draw(hMem2DC, hMem1DC);
@@ -176,8 +188,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			BoomCheck = FALSE;
 		}
 		
+		// 플레이어 체력 UI 그리기
+		if (player.hp > 50) {
+			//TransparentBlt(hMem2DC,)
+		}else if (player.hp > 40 && player.hp < 50) {
+
+		}
+		else if (player.hp > 30 && player.hp < 40) {
 		
-		BitBlt(hDC, ViewRect.left, ViewRect.top, ViewRect.right, ViewRect.bottom, hMem2DC, 0, 0, SRCCOPY);
+		}
+		else if (player.hp > 20 && player.hp < 30) {
+		
+		}
+		else if (player.hp > 10 && player.hp < 20) {
+		
+		}
+		else if (player.hp > 0 && player.hp < 10) {
+		
+		}else if(player.hp <= 0) {
+		
+		}
+		
+		BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
+		
+
 
 		SelectObject(hMem2DC, hOldBitmap);
 		DeleteObject(hBitmap);
@@ -232,6 +266,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				tear++;
 			}
 		}
+
+		/*if (BoomCheck) {
+			BoomCount++;
+			if (BoomCount >= 16) {
+				BoomCheck = FALSE;
+				BoomCount = 0;
+			}
+			break;
+		}*/
 
 		POINT point = { player.Tx, player.Ty };
 
@@ -352,10 +395,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 void DrawBoom(HDC nhDC, HDC nhMemDC, int x, int y) {
 	
-	for (int i = 0; i < 15; i++) {
-		HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, TearsBoomBitMap[i]); // 0번 비트맵 사용
-		TransparentBlt(nhDC, x-8, y-8, 64, 64, nhMemDC, 0, 0, 64, 64, RGB(255, 200, 200)); // 눈물 그리기
-		SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
-	}
+	HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, TearsBoomBitMap[BoomCount]); // 0번 비트맵 사용
+	TransparentBlt(nhDC, x-8, y-8, 64, 64, nhMemDC, 0, 0, 64, 64, RGB(255, 200, 200)); // 눈물 그리기
+	SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 
 };
+
