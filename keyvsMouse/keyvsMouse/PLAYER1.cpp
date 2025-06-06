@@ -101,13 +101,13 @@ void PLAYER1::SetCamera() { // 카메라 업데이트
 	int camHeight = 1000;
 
 	int newLeft = Tx - camWidth / 2;
-	int newTop = Ty - camHeight / 2;
+	int newTop = Ty - 400;
 
 	// 카메라가 맵 밖으로 나가지 않도록 제한
 	if (newLeft < 0) newLeft = 0;
 	if (newTop < 0) newTop = 0;
 	if (newLeft + camWidth > 4000) newLeft = 4000 - camWidth;
-	if (newTop + camHeight > 4000) newTop = 4000 - camHeight;
+	if (newTop + 1100 > 4000) newTop = 4000 - 1100;
 
 	// 최종 설정
 	Came.left = newLeft;

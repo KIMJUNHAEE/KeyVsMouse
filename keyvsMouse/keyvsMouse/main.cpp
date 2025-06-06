@@ -87,7 +87,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	
 	static HPEN hPen, hOldPen;
 	static HBRUSH hBrush, hOldBrush;
-	static PLAYER1 player(60, 500, 500, 5, 1.0f, 10, 2, 0, down); // 생성자
+	static PLAYER1 player(60, 500, 400, 5, 1.0f, 10, 2, 0, down); // 생성자
 	static RoundTear Rt(player.Tx,player.Ty); // 눈물 생성자
 
 	static POINT cursor; // 마우스 커서 좌표
@@ -132,9 +132,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 
 		HeartRect.left = player.Came.left + 10;
-		HeartRect.right = HeartRect.left + 45; 
+		HeartRect.right = HeartRect.left + 49; 
 		HeartRect.top = player.Came.top + 10;
-		HeartRect.bottom = HeartRect.top + 14; 
+		HeartRect.bottom = HeartRect.top + 15; 
 
 		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
 		break;
@@ -204,33 +204,45 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		HeartRect.right = HeartRect.left + 45;
 		HeartRect.top = player.Came.top + 10;
 		HeartRect.bottom = HeartRect.top + 14;
-		//TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 44, 21, 14, RGB(255, 200, 200));
+
 		HBITMAP HoldBitmap = (HBITMAP)SelectObject(hMem1DC, HeatBitmap);
 		if (player.hp > 50) {
 			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
-		}else if (player.hp > 40 && player.hp < 50) {
-
+			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
+		}else if (player.hp > 40 && player.hp <= 50) {
+			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 16, 0, 15, 14, RGB(255, 200, 200));
 		}
-		else if (player.hp > 30 && player.hp < 40) {
-		
+		else if (player.hp > 30 && player.hp <= 40) {
+			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
 		}
-		else if (player.hp > 20 && player.hp < 30) {
-		
+		else if (player.hp > 20 && player.hp <= 30) {
+			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 16, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
 		}
-		else if (player.hp > 10 && player.hp < 20) {
-		
+		else if (player.hp > 10 && player.hp <= 20) {
+			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
 		}
-		else if (player.hp > 0 && player.hp < 10) {
-		
+		else if (player.hp > 0 && player.hp <= 10) {
+			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 16, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
 		}else if(player.hp <= 0) {
-		
+			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
+			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
 		}
 		SelectObject(hMem1DC, HoldBitmap);
 
 		BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
 		
-
-
 		SelectObject(hMem2DC, hOldBitmap);
 		DeleteObject(hBitmap);
 		DeleteDC(hMem2DC);
@@ -238,7 +250,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		char buf[100];
 		sprintf_s(buf, "%d", player.hp);
-		TextOutA(hDC, 10, 10, buf, strlen(buf));
+		//TextOutA(hDC, 10, 10, buf, strlen(buf));
 
 		EndPaint(hWnd, &ps);
 		break;
