@@ -8,7 +8,7 @@ enum DIRECTION {
 
 class PLAYER1
 {
-private:
+private:	
 	int x, y; // 플레이어 머리 좌상단 좌표
 	int Mspeed; // 이동속도
 	float Aspeed; // 공격속도

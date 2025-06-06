@@ -9,8 +9,11 @@
 #include "TEARS.h"
 #include "RoundTear.h"
 
-#define WINDOW_WIDTH 1000
-#define WINDOW_HEIGHT 1000
+#define WINDOW_WIDTH 4000
+#define WINDOW_HEIGHT 4000
+int worldX;
+int worldY;
+
 
 int MoveCheck = 0; // 0: 정지, 1: 위, 2: 아래, 3: 왼쪽, 4: 오른쪽
 int MoveCount = 0; // 움직임 카운트 (애니메이션 프레임을 위한 카운트)
@@ -28,6 +31,9 @@ bool BoomCheck = FALSE;
 int BoomCount = 0;
 void DrawBoom(HDC nhDC, HDC nhMemDC, int x, int y);
 HBITMAP TearsBoomBitMap[15];
+
+RECT HeartRect;
+HBITMAP HeatBitmap;
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -58,7 +64,7 @@ int WINAPI WinMain(HINSTANCE hlnstance, HINSTANCE hPrevlnstance, LPSTR lpszCmdPa
 	WndClass.hIconSm = LoadIcon(NULL, IDI_ERROR);
 	RegisterClassExW(&WndClass); // RegisterClassExW -> 유니코드 지원
 
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, NULL, (HMENU)NULL, hlnstance, NULL);
+	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME, 0, 0, 1000, 1000, NULL, (HMENU)NULL, hlnstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
@@ -74,10 +80,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hDC, hMem1DC, hMem2DC, hMem3DC;
 	HBITMAP OldBit[3];
-	static HBITMAP BackGroundhBitmap, HeatBitmap;
+	static HBITMAP BackGroundhBitmap;
 	HBITMAP hBitmap, hOldBitmap;
 
 	static RECT ViewRect;
+	
 	static HPEN hPen, hOldPen;
 	static HBRUSH hBrush, hOldBrush;
 	static PLAYER1 player(60, 500, 500, 5, 1.0f, 10, 2, 0, down); // 생성자
@@ -124,17 +131,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			return -1;
 		}
 
+		HeartRect.left = player.Came.left + 10;
+		HeartRect.right = HeartRect.left + 45; 
+		HeartRect.top = player.Came.top + 10;
+		HeartRect.bottom = HeartRect.top + 14; 
 
 		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
 		break;
 	case WM_PAINT: {
 		hDC = BeginPaint(hWnd, &ps);
+
 		// Mem2DC 에 몬스터 더블버퍼링
 		hMem2DC = CreateCompatibleDC(hDC); // hMem2DC에다가 다 그림
 		hMem1DC = CreateCompatibleDC(hMem2DC); // hMem1DC는 플레이어 버퍼용, 1이랑 2 연결시켜주는 줄
 		hBitmap = CreateCompatibleBitmap(hDC, 4000, 4000); // 4000x4000 크기의 비트맵 생성
 		hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap);
-		//FillRect(hMem2DC, &ViewRect, (HBRUSH)GetStockObject(WHITE_BRUSH));
 		
 		HBITMAP oldBitmap = (HBITMAP)SelectObject(hMem1DC, BackGroundhBitmap); // 배경비트맵 사용
 		BitBlt(hMem2DC, 0, 0, 4000, 4000, hMem1DC, 0, 0, SRCCOPY); // 배경 그리기
@@ -189,8 +200,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		
 		// 플레이어 체력 UI 그리기
+		HeartRect.left = player.Came.left + 10;
+		HeartRect.right = HeartRect.left + 45;
+		HeartRect.top = player.Came.top + 10;
+		HeartRect.bottom = HeartRect.top + 14;
+		//TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 44, 21, 14, RGB(255, 200, 200));
+		HBITMAP HoldBitmap = (HBITMAP)SelectObject(hMem1DC, HeatBitmap);
 		if (player.hp > 50) {
-			//TransparentBlt(hMem2DC,)
+			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
 		}else if (player.hp > 40 && player.hp < 50) {
 
 		}
@@ -208,7 +225,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}else if(player.hp <= 0) {
 		
 		}
-		
+		SelectObject(hMem1DC, HoldBitmap);
+
 		BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
 		
 
@@ -377,8 +395,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_LBUTTONDOWN:
+		worldX = cursor.x + player.Came.left;
+		worldY = cursor.y + player.Came.top;
+
 		monsters.emplace_back();
-		monsters.back().SetSpot(cursor.x, cursor.y);
+		monsters.back().SetSpot(worldX, worldY);
 		monsters.back().SetRect();
 		monsters.back().SetMonster((Mtype % 3) + 1);
 
