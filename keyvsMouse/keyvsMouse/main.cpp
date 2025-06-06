@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>	
 #include <vector>
+#include <string.h>
 
 #include "PLAYER1.h"
 #include "MONSTER.h"
@@ -37,6 +38,10 @@ HBITMAP HeatBitmap;
 int DieX, DieY; // 플레이어 사망 좌표
 HBITMAP DieBitmap; // 플레이어 사망 이미지 비트맵
 bool isPlayerDead = false;
+
+bool showLevelUpChoices = false;
+int LevelUpChoices[3]; // 선택지 배열
+char LC[3][100]; // 선택지 텍스트
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -149,6 +154,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			MessageBox(hWnd, _T("Failed to load DieP image"), _T("Error"), MB_OK | MB_ICONERROR);
 			return -1;
 		}
+
+		
+
 
 
 		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
@@ -267,6 +275,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		SelectObject(hMem1DC, HoldBitmap);
 
+		if (showLevelUpChoices) {
+			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 80, LC[0], strlen(LC[0]));
+			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 100, LC[1], strlen(LC[1]));
+			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 120, LC[2], strlen(LC[2]));
+		}
+
+		char LVbuf[100];
+		char LPbuf[100];
+		sprintf_s(LVbuf, "Lv : %d", player.Level);
+		sprintf_s(LPbuf, "Lp : %d", player.Lp);
+		TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 40, LVbuf, strlen(LVbuf));
+		TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 60, LPbuf, strlen(LPbuf));
+
+
 		BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
 		
 		SelectObject(hMem2DC, hOldBitmap);
@@ -274,12 +296,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		DeleteDC(hMem2DC);
 		DeleteDC(hMem1DC);
 
-		char LVbuf[100];
-		char LPbuf[100];
-		sprintf_s(LVbuf, "Lv : %d", player.Level);
-		sprintf_s(LPbuf, "Lp : %d", player.Lp);
-		TextOutA(hDC, 10, 40, LVbuf, strlen(LVbuf));
-		TextOutA(hDC, 10, 60, LPbuf, strlen(LPbuf)); 
+		
 
 		EndPaint(hWnd, &ps);
 		break;
@@ -439,13 +456,90 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			//PostQuitMessage(0); // 게임 종료
 		}
 
+		// 레벨업 후 선택지
+		if (player.LevelUp) {
+			showLevelUpChoices = true;
+			
+			for (int i = 0; i < 3; i++) {
+				LevelUpChoices[i] = rand() % 3 + 1;
 
+				if (LevelUpChoices[i] == 1) {
+					strcpy_s(LC[i], "이동속도 증가");
+					//LC[i][strlen(LC[i]) - 1] = '\0';
+				}
+				else if (LevelUpChoices[i] == 2) {
+					strcpy_s(LC[i], "공격력 증가");
+					//LC[i][strlen(LC[i]) - 1] = '\0';
+				}
+				else if (LevelUpChoices[i] == 3) {
+					if (player.Aspeed == 0.1f) {
+						strcpy_s(LC[i], "이미 최대 공격속도 입니다");
+						//LC[i][strlen(LC[i]) - 1] = '\0';
+					}
+					else {
+						strcpy_s(LC[i], "공격속도 증가");
+						//LC[i][strlen(LC[i]) - 1] = '\0';
+					}
+				}
+			}
+
+			player.LevelUp = false;
+		}
 
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 	}
 	case WM_KEYDOWN:
-	
+		if (showLevelUpChoices) {
+			switch (wParam) {
+			case '1':
+				if (LevelUpChoices[0] == 1) { // 1 = 이속증가
+					player.Mspeed += 2;
+				}
+				else if (LevelUpChoices[0] == 2) { // 2 = 공격력 증가
+					player.Damage += 5;
+				}
+				else if (LevelUpChoices[0] == 3) { // 3 = 공속 증가
+					if (player.Aspeed > 0.2f) {
+						player.Aspeed -= 0.1f;
+					}
+				}
+				showLevelUpChoices = false;
+				break;
+			case '2':
+				if (LevelUpChoices[1] == 1) { // 1 = 이속증가
+					player.Mspeed += 2;
+				}
+				else if (LevelUpChoices[1] == 2) { // 2 = 공격력 증가
+					player.Damage += 5;
+				}
+				else if (LevelUpChoices[1] == 3) { // 3 = 공속 증가
+					if (player.Aspeed > 0.2f) {
+						player.Aspeed -= 0.1f;
+					}
+				}
+				showLevelUpChoices = false;
+				break;
+			case '3':
+				if (LevelUpChoices[2] == 1) { // 1 = 이속증가
+					player.Mspeed += 2;
+				}
+				else if (LevelUpChoices[2] == 2) { // 2 = 공격력 증가
+					player.Damage += 5;
+				}
+				else if (LevelUpChoices[2] == 3) { // 3 = 공속 증가
+					if (player.Aspeed > 0.2f) {
+						player.Aspeed -= 0.1f;
+					}
+				}
+				showLevelUpChoices = false;
+				break;
+			}
+			break;
+		}
+		break;
+
+
 		break;
 	case WM_KEYUP:
 

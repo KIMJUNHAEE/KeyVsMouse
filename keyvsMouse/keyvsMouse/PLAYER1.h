@@ -10,8 +10,6 @@ class PLAYER1
 {
 private:	
 	int x, y; // 플레이어 머리 좌상단 좌표
-	int Mspeed; // 이동속도
-	float Aspeed; // 공격속도
 	int range; // 공격 사거리
 	int size; // 플레이어 크기
 	int Act; // 액티브 아이템 시드값
@@ -26,14 +24,17 @@ public:
 	int hp; // 플레이어 체력
 	int Tx, Ty; // 플레이어 타겟 좌표
 	int Damage; // 플레이어 공격력
+	float Aspeed; // 공격속도
 	int Lp = 0; // 플레이어 레벨
 	int Level = 1; // 플레이어 레벨
+	int Mspeed; // 이동속도
 	RECT HeadRect; // 플레이어 머리 그리기용 좌표 
 	RECT BodyRect; // 플레이어 몸통 그리기용 좌표 
 	RECT DieRect; // 플레이어 사망 그리기용 좌표
 	RECT Came; // 카메라 영역 (1000,1000)
 	float InTimer = 0.0f; // 내부 타이머
 	HBITMAP P1BitMap[6]; // 플레이어 비트맵
+	bool LevelUp = FALSE; // 레벨업 여부
 
 	// 값 변경 함수
 	void SetSpot(int nx, int ny); // 좌표 설정
