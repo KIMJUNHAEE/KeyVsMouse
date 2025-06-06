@@ -4,6 +4,7 @@ CImage IMGfly[14];
 CImage IMGparabite[8];
 CImage IMGisaac[17];
 CImage IMGmom[23];
+CImage IMGdeath[12];
 
 void ImageCreate() {
 	for (int i = 0; i < 14; i++) {
@@ -25,6 +26,11 @@ void ImageCreate() {
 		TCHAR filePath[50];
 		_stprintf_s(filePath, TEXT("Monster_graphics/boss_02_mom_0%d.png"), i);
 		IMGmom[i].Load(filePath);
+	}
+	for (int i = 0; i < 12; i++) {
+		TCHAR filePath[50];
+		_stprintf_s(filePath, TEXT("Monster_graphics/effect_01_death_0%d.png"), i);
+		IMGdeath[i].Load(filePath);
 	}
 }
 

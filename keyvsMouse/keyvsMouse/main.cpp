@@ -218,6 +218,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		DeleteDC(hMem2DC);
 		DeleteDC(hMem1DC);
 
+		char buf[100];
+		sprintf_s(buf, "%d", player.hp);
+		TextOutA(hDC, 10, 10, buf, strlen(buf));
+
 		EndPaint(hWnd, &ps);
 		break;
 	}
@@ -283,7 +287,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				monster = monsters.erase(monster);
 			}
 			else {
-				monster->MoveToPlayer(point, player.HeadRect, player.BodyRect, DeltaTime);
+				player.hp -= monster->MoveToPlayer(point, player.HeadRect, player.BodyRect, DeltaTime);
 				monster++;
 			}
 		}
