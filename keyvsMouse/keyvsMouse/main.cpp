@@ -274,9 +274,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		DeleteDC(hMem2DC);
 		DeleteDC(hMem1DC);
 
-		char buf[100];
-		sprintf_s(buf, "%d", player.hp);
-		//TextOutA(hDC, 10, 10, buf, strlen(buf));
+		char LVbuf[100];
+		char LPbuf[100];
+		sprintf_s(LVbuf, "Lv : %d", player.Level);
+		sprintf_s(LPbuf, "Lp : %d", player.Lp);
+		TextOutA(hDC, 10, 40, LVbuf, strlen(LVbuf));
+		TextOutA(hDC, 10, 60, LPbuf, strlen(LPbuf)); 
 
 		EndPaint(hWnd, &ps);
 		break;
@@ -309,6 +312,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					if (IntersectRect(&ResultRect, &tear->TearRect, &monster->rect)) {
 						hit = TRUE;
 						monster->hp -= player.Damage;
+						if (monster->hp <= 0) {
+							monster->killedByTear = TRUE; // 눈물에 의해 몬스터 죽음
+						}
 						break;
 					}
 					else {
@@ -342,6 +348,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		for (auto monster = monsters.begin(); monster != monsters.end();) {
 			if (monster->Update(DeltaTime)) {
+				if (monster->killedByTear) {
+					player.AddLp(10); // 눈물로 죽인 경우만 LP 추가
+				}
 				monster = monsters.erase(monster);
 			}
 			else {

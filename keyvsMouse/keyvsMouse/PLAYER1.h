@@ -26,6 +26,8 @@ public:
 	int hp; // 플레이어 체력
 	int Tx, Ty; // 플레이어 타겟 좌표
 	int Damage; // 플레이어 공격력
+	int Lp = 0; // 플레이어 레벨
+	int Level = 1; // 플레이어 레벨
 	RECT HeadRect; // 플레이어 머리 그리기용 좌표 
 	RECT BodyRect; // 플레이어 몸통 그리기용 좌표 
 	RECT DieRect; // 플레이어 사망 그리기용 좌표
@@ -68,6 +70,7 @@ public:
 	void LMDraw(HDC nhDC, HDC nMemDC, int nCount); // 왼쪽으로 움직임 그리기
 	void ULMDraw(HDC nhDC, HDC nMemDC, int nCount); // 좌상단 대각선 움직임 그리기
 	int ShootTime(float deltaTime); // 공격 타이머 업데이트
+	void AddLp(int nLp); // 플레이어 레벨 증가 함수
 
 
 };

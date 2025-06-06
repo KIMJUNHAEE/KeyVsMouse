@@ -26,6 +26,7 @@ public:
 
 	RECT rect; // 그리기용 좌표
 	int hp; // 체력
+	bool killedByTear = FALSE;
 	MONSTER(); // 디폴트 생성자
 	~MONSTER(); // 소멸자
 

@@ -413,7 +413,7 @@ int PLAYER1::SetDieRect(float deltaTime) {
 	BodyRect.bottom = 0;
 	DieTimer += deltaTime;
 
-	if (DieTimer <= 2.0f) {
+	if (DieTimer <= 1.0f) {
 		DieRect.right = 29*2;
 		DieRect.bottom = 34*2;
 		return 9;
@@ -425,3 +425,13 @@ int PLAYER1::SetDieRect(float deltaTime) {
 		return 10;
 	}
 };
+
+void PLAYER1::AddLp(int nLp) {
+	Lp += nLp;
+
+	if (Lp >= 100) {
+		Level += 1;
+		Lp -= 100;
+	}
+
+}
