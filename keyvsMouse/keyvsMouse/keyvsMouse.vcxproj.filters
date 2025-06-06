@@ -51,5 +51,6 @@
     <Image Include="P1_graphics\Tb_14.bmp" />
     <Image Include="P1_graphics\Tb_15.bmp" />
     <Image Include="P1_graphics\ui_hearts.bmp" />
+    <Image Include="P1_graphics\DieP.bmp" />
   </ItemGroup>
 </Project>

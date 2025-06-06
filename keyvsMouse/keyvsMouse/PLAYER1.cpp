@@ -391,7 +391,6 @@ void PLAYER1::LMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 왼쪽으로 움직임 그리
 	SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 };
 
-
 int PLAYER1::ShootTime(float deltaTime) { // 공격 타이머 업데이트 함수
 	InTimer += deltaTime;
 	if (InTimer >= Aspeed) {
@@ -399,4 +398,30 @@ int PLAYER1::ShootTime(float deltaTime) { // 공격 타이머 업데이트 함수
 		return 1; // 공격!
 	}
 	return 0; // 쏘지마라!
+};
+
+int PLAYER1::SetDieRect(float deltaTime) {
+	DieRect.left = HeadRect.left;
+	DieRect.top = HeadRect.top;
+	HeadRect.left = 0;
+	HeadRect.right = 0;
+	HeadRect.top = 0;
+	HeadRect.bottom = 0;
+	BodyRect.left = 0;
+	BodyRect.right = 0;
+	BodyRect.top = 0;
+	BodyRect.bottom = 0;
+	DieTimer += deltaTime;
+
+	if (DieTimer <= 2.0f) {
+		DieRect.right = 29*2;
+		DieRect.bottom = 34*2;
+		return 9;
+	}
+	else {
+		DieRect.top += 7;
+		DieRect.right = 67;
+		DieRect.bottom = 28;
+		return 10;
+	}
 };

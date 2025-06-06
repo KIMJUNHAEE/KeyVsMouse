@@ -17,9 +17,7 @@ private:
 	int Act; // 액티브 아이템 시드값
 	int Pct[80]; // 패시브 아이템 시드 배열
 	int view; // 시선
-
-	
-	HBITMAP P1BitMap[6]; // 플레이어 비트맵
+	float DieTimer = 0.0f;
 
 public:
 	PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange, int nsize, int nAct, int nview); // 생성자
@@ -30,8 +28,10 @@ public:
 	int Damage; // 플레이어 공격력
 	RECT HeadRect; // 플레이어 머리 그리기용 좌표 
 	RECT BodyRect; // 플레이어 몸통 그리기용 좌표 
+	RECT DieRect; // 플레이어 사망 그리기용 좌표
 	RECT Came; // 카메라 영역 (1000,1000)
 	float InTimer = 0.0f; // 내부 타이머
+	HBITMAP P1BitMap[6]; // 플레이어 비트맵
 
 	// 값 변경 함수
 	void SetSpot(int nx, int ny); // 좌표 설정
@@ -46,7 +46,8 @@ public:
 	void SetBodyRect(); // 플레이어 몸통 그리기용 좌표 설정
 	void SetTarget(); // 플레이어 타겟 좌표 설정
 	void SetCamera(); // 카메라 업데이트
-	void SetBitMap(HBITMAP nhBitmap, int nindex); // 플레이어 비트맵 설정
+	void SetBitMap(HBITMAP nhBitmap, int nindex); // 플레이어 비트맵 설정(
+	int SetDieRect(float deltaTime); // 사망 Rect 설정
 
 	// 이동함수
 	void MoveLeft(); // 좌로 이동 함수
@@ -67,6 +68,7 @@ public:
 	void LMDraw(HDC nhDC, HDC nMemDC, int nCount); // 왼쪽으로 움직임 그리기
 	void ULMDraw(HDC nhDC, HDC nMemDC, int nCount); // 좌상단 대각선 움직임 그리기
 	int ShootTime(float deltaTime); // 공격 타이머 업데이트
+
 
 };
 

@@ -11,9 +11,8 @@
 
 #define WINDOW_WIDTH 4000
 #define WINDOW_HEIGHT 4000
-int worldX;
-int worldY;
-
+int worldX; // 마우스->월드 x좌표
+int worldY; // 마우스->월드 y좌표
 
 int MoveCheck = 0; // 0: 정지, 1: 위, 2: 아래, 3: 왼쪽, 4: 오른쪽
 int MoveCount = 0; // 움직임 카운트 (애니메이션 프레임을 위한 카운트)
@@ -34,6 +33,10 @@ HBITMAP TearsBoomBitMap[15];
 
 RECT HeartRect;
 HBITMAP HeatBitmap;
+
+int DieX, DieY; // 플레이어 사망 좌표
+HBITMAP DieBitmap; // 플레이어 사망 이미지 비트맵
+bool isPlayerDead = false;
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -115,6 +118,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		player.SetCamera();
 
+		// 배경 이미지 로드
 		TCHAR BGfilepath[256];
 		_stprintf_s(BGfilepath, _T("Play_graphics/background.bmp")); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
 		BackGroundhBitmap = (HBITMAP)LoadImage(NULL, BGfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -123,6 +127,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			return -1;
 		}
 
+		// Heart 이미지 로드
 		TCHAR Heartfilepath[256];
 		_stprintf_s(Heartfilepath, _T("P1_graphics/ui_hearts.bmp")); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
 		HeatBitmap = (HBITMAP)LoadImage(NULL, Heartfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -135,6 +140,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		HeartRect.right = HeartRect.left + 49; 
 		HeartRect.top = player.Came.top + 10;
 		HeartRect.bottom = HeartRect.top + 15; 
+
+		// 플레이어 사망 이미지 로드
+		TCHAR DIefilepath[256];
+		_stprintf_s(DIefilepath, _T("P1_graphics/DieP.bmp")); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
+		DieBitmap = (HBITMAP)LoadImage(NULL, DIefilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		if (DieBitmap == NULL) {
+			MessageBox(hWnd, _T("Failed to load DieP image"), _T("Error"), MB_OK | MB_ICONERROR);
+			return -1;
+		}
+
 
 		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
 		break;
@@ -151,40 +166,51 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		BitBlt(hMem2DC, 0, 0, 4000, 4000, hMem1DC, 0, 0, SRCCOPY); // 배경 그리기
 		SelectObject(hMem1DC, oldBitmap); // 이전 비트맵으로 되돌리기
 
-		
-		if (MoveCheck == 0) {
-			player.Draw(hMem2DC, hMem1DC);
+		if (!isPlayerDead) {
+			if (MoveCheck == 0) {
+				player.Draw(hMem2DC, hMem1DC);
+			}
+			else if (MoveCheck == 1) {
+				player.UMDraw(hMem2DC, hMem1DC, MoveCount);
+			}
+			else if (MoveCheck == 2) {
+				player.DMDraw(hMem2DC, hMem1DC, MoveCount);
+			}
+			else if (MoveCheck == 3) {
+				player.LMDraw(hMem2DC, hMem1DC, MoveCount);
+			}
+			else if (MoveCheck == 4) {
+				player.RMDraw(hMem2DC, hMem1DC, MoveCount);
+			}
+			else if (MoveCheck == 5) {
+				player.LMDraw(hMem2DC, hMem1DC, MoveCount);
+			}
+			else if (MoveCheck == 6) {
+				player.RMDraw(hMem2DC, hMem1DC, MoveCount);
+			}
+			else if (MoveCheck == 7) {
+				player.LMDraw(hMem2DC, hMem1DC, MoveCount);
+			}
+			else if (MoveCheck == 8) {
+				player.RMDraw(hMem2DC, hMem1DC, MoveCount);
+			}
+			Rt.Update(player.Tx, player.Ty, DeltaTime);
+			Rt.SetRtTearRect();
+			Rt.Draw(hMem2DC, hMem1DC); // Rt 눈물 그리기
 		}
-		else if (MoveCheck == 1) {
-			player.UMDraw(hMem2DC, hMem1DC, MoveCount);
-		}
-		else if (MoveCheck == 2) {
-			player.DMDraw(hMem2DC, hMem1DC, MoveCount);
-		}
-		else if (MoveCheck == 3) {
-			player.LMDraw(hMem2DC, hMem1DC, MoveCount);
-		}
-		else if (MoveCheck == 4) {
-			player.RMDraw(hMem2DC, hMem1DC, MoveCount);
-		}
-		else if (MoveCheck == 5) {
-			player.LMDraw(hMem2DC, hMem1DC, MoveCount);
-		}
-		else if (MoveCheck == 6) {
-			player.RMDraw(hMem2DC, hMem1DC, MoveCount);
-		}
-		else if (MoveCheck == 7) {
-			player.LMDraw(hMem2DC, hMem1DC, MoveCount);
-		}
-		else if( MoveCheck == 8) {
-			player.RMDraw(hMem2DC, hMem1DC, MoveCount);
-		}
-		
+		else if(isPlayerDead){
+			HBITMAP DoldBitmap = (HBITMAP)SelectObject(hMem1DC, DieBitmap);
+			if (MoveCheck == 9) {
+				TransparentBlt(hMem2DC, player.DieRect.left, player.DieRect.top, 29 * 2, 34 * 2, hMem1DC, 0, 0, 29, 34, RGB(255, 200, 200));
+			}
+			else if (MoveCheck == 10) {
+				TransparentBlt(hMem2DC, player.DieRect.left, player.DieRect.top, 80, 28*2, hMem1DC, 30, 0, 37, 28, RGB(255, 200, 200));
 
-		Rt.Update(player.Tx, player.Ty, DeltaTime); 
-		Rt.SetRtTearRect();
-		Rt.Draw(hMem2DC, hMem1DC); // Rt 눈물 그리기
-
+			}
+			
+			SelectObject(hMem1DC, DoldBitmap);
+		}
+		
 
 		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
 			monster.Draw(hMem2DC);
@@ -264,51 +290,53 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		player.SetTarget();
 		int ShootCheck = player.ShootTime(DeltaTime); // 플레이어 눈물발사 시간 체크, 기본 3초마다 쏨
 
-		if (ShootCheck == 1) {
-			TEARS tear(player.Tx, player.Ty);
-			tear.Shoot(Rt.x, Rt.y);
-			tears.push_back(tear);
-		
-		}
+		if (!isPlayerDead) {
+			if (ShootCheck == 1) {
+				TEARS tear(player.Tx, player.Ty);
+				tear.Shoot(Rt.x, Rt.y);
+				tears.push_back(tear);
 
-		
-		// 눈물 이동 및 제거
-		for (auto tear = tears.begin(); tear != tears.end(); ) {
-			tear->Update(DeltaTime);
-			tear->SetTearRect();
-			bool hit = false;
-			
-			for (auto monster = monsters.begin(); monster != monsters.end(); ) {
-				RECT ResultRect;
-				if (IntersectRect(&ResultRect, &tear->TearRect, &monster->rect)) {
-					hit = TRUE;
-					monster->hp -= player.Damage;
-					break;
+			}
+
+			// 눈물 이동 및 제거
+			for (auto tear = tears.begin(); tear != tears.end(); ) {
+				tear->Update(DeltaTime);
+				tear->SetTearRect();
+				bool hit = false;
+
+				for (auto monster = monsters.begin(); monster != monsters.end(); ) {
+					RECT ResultRect;
+					if (IntersectRect(&ResultRect, &tear->TearRect, &monster->rect)) {
+						hit = TRUE;
+						monster->hp -= player.Damage;
+						break;
+					}
+					else {
+						monster++;
+					}
+				}
+
+				if (hit || tear->IsOutOfRange()) {
+					BoomX = tear->x;
+					BoomY = tear->y;
+					BoomCheck = TRUE;
+					tear = tears.erase(tear);
+					hit = FALSE;
 				}
 				else {
-					monster++;
+					tear++;
 				}
 			}
 
-			if (hit||tear->IsOutOfRange()) {
-				BoomX = tear->x;
-				BoomY = tear->y;
-				BoomCheck = TRUE;
-				tear = tears.erase(tear);
-				hit = FALSE;
-			}else {
-				tear++;
-			}
+			/*if (BoomCheck) {
+				BoomCount++;
+				if (BoomCount >= 16) {
+					BoomCheck = FALSE;
+					BoomCount = 0;
+				}
+				break;
+			}*/
 		}
-
-		/*if (BoomCheck) {
-			BoomCount++;
-			if (BoomCount >= 16) {
-				BoomCheck = FALSE;
-				BoomCount = 0;
-			}
-			break;
-		}*/
 
 		POINT point = { player.Tx, player.Ty };
 
@@ -322,75 +350,86 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			}
 		}
 
-		SHORT w = GetAsyncKeyState('W');
-		SHORT s = GetAsyncKeyState('S');
-		SHORT a = GetAsyncKeyState('A');
-		SHORT d = GetAsyncKeyState('D');
+		if (!isPlayerDead) {
+			SHORT w = GetAsyncKeyState('W');
+			SHORT s = GetAsyncKeyState('S');
+			SHORT a = GetAsyncKeyState('A');
+			SHORT d = GetAsyncKeyState('D');
 
-		bool W = w & 0x8000;
-		bool S = s & 0x8000;
-		bool A = a & 0x8000;
-		bool D = d & 0x8000;
+			bool W = w & 0x8000;
+			bool S = s & 0x8000;
+			bool A = a & 0x8000;
+			bool D = d & 0x8000;
 
-		// 방향 우선 순위: 대각선 > 단일 방향
-		if (W && A) {
-			player.MoveUpLeft();     // 좌상
-			MoveCheck = 5;
+			// 방향 우선 순위: 대각선 > 단일 방향
+			if (W && A) {
+				player.MoveUpLeft();     // 좌상
+				MoveCheck = 5;
+			}
+			else if (W && D) {
+				player.MoveUpRight();    // 우상
+				MoveCheck = 6;
+			}
+			else if (S && A) {
+				player.MoveDownLeft();   // 좌하
+				MoveCheck = 7;
+			}
+			else if (S && D) {
+				player.MoveDownRight();  // 우하
+				MoveCheck = 8;
+			}
+			else if (W) {
+				player.MoveUp();
+				MoveCheck = 1;
+			}
+			else if (S) {
+				player.MoveDown();
+				MoveCheck = 2;
+			}
+			else if (A) {
+				player.MoveLeft();
+				MoveCheck = 3;
+			}
+			else if (D) {
+				player.MoveRight();
+				MoveCheck = 4;
+			}
+			else {
+				MoveCheck = 0; // 멈춤
+			}
+
+			SHORT h = GetAsyncKeyState('H');
+			SHORT j = GetAsyncKeyState('J');
+
+			bool H = h & 0x8000;
+			bool J = j & 0x8000;
+
+			// 회전 방향 설정
+			if (H) {
+				Rt.rotationDir = -1; // 반시계 방향
+			}
+			else if (J) {
+				Rt.rotationDir = 1; // 시계 방향
+			}
+			else {
+				Rt.rotationDir = 0; // 멈춤
+			}
+
+			// 애니메이션 프레임 카운트 증가
+			if (MoveCheck != 0) {
+				MoveCount++;
+				if (MoveCount >= 9) MoveCount = 0;
+			}
 		}
-		else if (W && D) {
-			player.MoveUpRight();    // 우상
-			MoveCheck = 6;
-		}
-		else if (S && A) {
-			player.MoveDownLeft();   // 좌하
-			MoveCheck = 7;
-		}
-		else if (S && D) {
-			player.MoveDownRight();  // 우하
-			MoveCheck = 8;
-		}
-		else if (W) {
-			player.MoveUp();
-			MoveCheck = 1;
-		}
-		else if (S) {
-			player.MoveDown();
-			MoveCheck = 2;
-		}
-		else if (A) {
-			player.MoveLeft();
-			MoveCheck = 3;
-		}
-		else if (D) {
-			player.MoveRight();
-			MoveCheck = 4;
-		}
-		else {
-			MoveCheck = 0; // 멈춤
+		
+		// 플레이어 주금
+		if(player.hp <= 0) {
+			MoveCheck = player.SetDieRect(DeltaTime);
+			isPlayerDead = TRUE;
+			//MessageBox(hWnd, _T("Game Over!"), _T("Game Over"), MB_OK | MB_ICONERROR);
+			//PostQuitMessage(0); // 게임 종료
 		}
 
-		SHORT h = GetAsyncKeyState('H');
-		SHORT j = GetAsyncKeyState('J');
-
-		bool H = h & 0x8000;
-		bool J = j & 0x8000;
-
-		// 회전 방향 설정
-		if (H) {
-			Rt.rotationDir = -1; // 반시계 방향
-		}
-		else if (J) {
-			Rt.rotationDir = 1; // 시계 방향
-		}
-		else {
-			Rt.rotationDir = 0; // 멈춤
-		}
-
-		// 애니메이션 프레임 카운트 증가
-		if (MoveCheck != 0) {
-			MoveCount++;
-			if (MoveCount >= 9) MoveCount = 0;
-		}
 
 
 		InvalidateRect(hWnd, NULL, FALSE);

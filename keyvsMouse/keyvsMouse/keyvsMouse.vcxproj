@@ -153,6 +153,7 @@
     <ResourceCompile Include="PLAYER1.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="P1_graphics\DieP.bmp" />
     <Image Include="P1_graphics\P1_1.bmp" />
     <Image Include="P1_graphics\P1_2.bmp" />
     <Image Include="P1_graphics\P1_3.bmp" />
