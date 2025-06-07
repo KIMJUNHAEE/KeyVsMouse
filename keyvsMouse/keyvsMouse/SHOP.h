@@ -22,6 +22,6 @@ public:
 	void SetCoin(int ncoin); // 코인 설정
 	void SetType(int n, int ntype); // 상점 별 몬스터 시드값 설정
 
-	void DrawShop(HDC hDC, int x, int y);
+	void DrawShop(HDC hDC, int x, int y);	
 };
 

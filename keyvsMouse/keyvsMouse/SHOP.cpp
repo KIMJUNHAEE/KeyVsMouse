@@ -6,11 +6,6 @@ SHOP::SHOP()
 
 	Xsize = 800;
 	Ysize = 200;
-
-	rect[0].left = x[0];
-	rect[0].top = y[0];
-	rect[0].right = 800;
-	rect[0].bottom = 1000;
 }
 
 SHOP::~SHOP()
