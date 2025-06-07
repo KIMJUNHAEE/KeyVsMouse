@@ -43,6 +43,10 @@ bool showLevelUpChoices = false;
 int LevelUpChoices[3]; // 선택지 배열
 char LC[3][100]; // 선택지 텍스트
 
+HDC hMiniMapDC = NULL;
+HBITMAP hMiniMapBitmap = NULL;
+void DrawMiniMap(HDC hDC, const PLAYER1& player, const std::vector<MONSTER>& monsters);
+
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"Key Vs Mouse";
@@ -155,8 +159,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			return -1;
 		}
 
+		//미니맵 영역 설정
+		//static RECT miniMapRect;
 		
-
 
 
 		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
@@ -173,6 +178,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		HBITMAP oldBitmap = (HBITMAP)SelectObject(hMem1DC, BackGroundhBitmap); // 배경비트맵 사용
 		BitBlt(hMem2DC, 0, 0, 4000, 4000, hMem1DC, 0, 0, SRCCOPY); // 배경 그리기
 		SelectObject(hMem1DC, oldBitmap); // 이전 비트맵으로 되돌리기
+
+		hMiniMapDC = CreateCompatibleDC(hDC);
+		hMiniMapBitmap = CreateCompatibleBitmap(hDC, 200, 200);
+		SelectObject(hMiniMapDC, hMiniMapBitmap);
 
 		if (!isPlayerDead) {
 			if (MoveCheck == 0) {
@@ -287,7 +296,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 40, LVbuf, strlen(LVbuf));
 		TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 60, LPbuf, strlen(LPbuf));
 
+		// 미니맵 그리기
+		/*miniMapRect.right = player.Came.right - 10;  // 카메라 기준 우측에서 -10px
+		miniMapRect.left = miniMapRect.right - 200;
+		miniMapRect.bottom = player.Came.bottom - 10;  // 카메라 기준 아래에서 -10px
+		miniMapRect.top = miniMapRect.bottom - 200;
+		
+		StretchBlt(
+			hMem2DC, miniMapRect.left, miniMapRect.top, 200, 200,   // 대상 위치 및 크기
+			hMem2DC, 0, 0, 4000, 4000,                          // 원본 (전체 월드)
+			SRCCOPY
+		);*/
 
+		DrawMiniMap(hMem2DC, player, monsters);
 		BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
 		
 		SelectObject(hMem2DC, hOldBitmap);
@@ -353,7 +374,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			// 눈물 터짐
 			if (BoomCheck) {
 				BoomCount++;
-				if (BoomCount >= 16) {
+				if (BoomCount >= 14) {
 					BoomCheck = FALSE;
 					BoomCount = 0;
 				}
@@ -571,11 +592,47 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	return (DefWindowProc(hWnd, iMessage, wParam, lParam));
 }
 
-void DrawBoom(HDC nhDC, HDC nhMemDC, int x, int y) {
+void DrawBoom(HDC nhDC, HDC nhMemDC, int x, int y) { // 눈물 폭발 그리기 함수
 	
 	HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, TearsBoomBitMap[BoomCount]); // 0번 비트맵 사용
 	TransparentBlt(nhDC, x-8, y-8, 64, 64, nhMemDC, 0, 0, 64, 64, RGB(255, 200, 200)); // 눈물 그리기
 	SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 
 };
+
+void DrawMiniMap(HDC hDC, const PLAYER1& player, const std::vector<MONSTER>& monsters) {
+	// 1. 전체 배경 클리어
+	HBRUSH bgBrush = CreateSolidBrush(RGB(220, 220, 220)); // 연회색 배경
+	RECT miniRect = { 0, 0, 200, 200 };
+	FillRect(hMiniMapDC, &miniRect, bgBrush);
+	DeleteObject(bgBrush);
+
+	// 2. 월드 크기 대비 비율 계산
+	float scaleX = 200.0f / WINDOW_WIDTH;
+	float scaleY = 200.0f / WINDOW_HEIGHT;
+
+	// 3. 몬스터 그리기 (빨간 점)
+	HBRUSH monsterBrush = CreateSolidBrush(RGB(255, 0, 0));
+	SelectObject(hMiniMapDC, monsterBrush);
+	for (const auto& m : monsters) {
+		int mx = static_cast<int>(m.x * scaleX);
+		int my = static_cast<int>(m.y * scaleY);
+		Ellipse(hMiniMapDC, mx - 2, my - 2, mx + 2, my + 2); // 4x4 점
+	}
+	DeleteObject(monsterBrush);
+
+	// 4. 플레이어 그리기 (파란 점)
+	HBRUSH playerBrush = CreateSolidBrush(RGB(0, 0, 255));
+	SelectObject(hMiniMapDC, playerBrush);
+	int px = static_cast<int>(player.Tx * scaleX);
+	int py = static_cast<int>(player.Ty * scaleY);
+	Ellipse(hMiniMapDC, px - 3, py - 3, px + 3, py + 3); // 6x6 점
+	DeleteObject(playerBrush);
+
+	// 5. 출력 위치 계산 (화면 오른쪽 아래)
+	int miniMapX = player.Came.right - 210;
+	int miniMapY = player.Came.bottom - 210;
+
+	BitBlt(hDC, miniMapX, miniMapY, 200, 200, hMiniMapDC, 0, 0, SRCCOPY);
+}
 

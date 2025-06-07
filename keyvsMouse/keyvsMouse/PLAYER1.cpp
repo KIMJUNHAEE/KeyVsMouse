@@ -25,7 +25,7 @@ PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange
 };
 
 PLAYER1::~PLAYER1() { // 소멸자
-	for (int i = 0; i < 7; i++) {
+	for (int i = 0; i < 6; i++) {
 		if (P1BitMap[i]) {
 			DeleteObject(P1BitMap[i]);  // GDI 리소스 해제
 			P1BitMap[i] = nullptr;      // 포인터 무효화 (안전)
@@ -214,11 +214,9 @@ void PLAYER1::Draw(HDC nhDC, HDC nMemDC) { // 출력 dc, 메모리 dc 받음, 정지상태 
 	
 	//몸통 메모리 -> 출력디시로
 	TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 44, 21, 14, RGB(255, 200, 200));
-
-
 	//머리 메모리 -> 출력디시로
 	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), nMemDC, 0, 0, 31, 26, RGB(255, 200, 200));
-
+	SelectObject(nMemDC, oldBitmap);
 }; // 그리기
 
 void PLAYER1::DMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 아래로 움직임 그리기
