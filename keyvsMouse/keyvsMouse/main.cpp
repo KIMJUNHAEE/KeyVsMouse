@@ -97,11 +97,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	HBITMAP hBitmap, hOldBitmap;
 
 	static RECT ViewRect;
-	
+
 	static HPEN hPen, hOldPen;
 	static HBRUSH hBrush, hOldBrush;
 	static PLAYER1 player(60, 500, 400, 5, 1.0f, 10, 2, 0, down); // 생성자
-	static RoundTear Rt(player.Tx,player.Ty); // 눈물 생성자
+	static RoundTear Rt(player.Tx, player.Ty); // 눈물 생성자
 
 	static POINT cursor; // 마우스 커서 좌표
 	static float DeltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
@@ -149,9 +149,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 
 		HeartRect.left = player.Came.left + 10;
-		HeartRect.right = HeartRect.left + 49; 
+		HeartRect.right = HeartRect.left + 49;
 		HeartRect.top = player.Came.top + 10;
-		HeartRect.bottom = HeartRect.top + 15; 
+		HeartRect.bottom = HeartRect.top + 15;
 
 		// 플레이어 사망 이미지 로드
 		TCHAR DIefilepath[256];
@@ -164,7 +164,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		//미니맵 영역 설정
 		//static RECT miniMapRect;
-		
+
 
 
 		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
@@ -177,7 +177,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hMem1DC = CreateCompatibleDC(hMem2DC); // hMem1DC는 플레이어 버퍼용, 1이랑 2 연결시켜주는 줄
 		hBitmap = CreateCompatibleBitmap(hDC, 4000, 4000); // 4000x4000 크기의 비트맵 생성
 		hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap);
-		
+
 		HBITMAP oldBitmap = (HBITMAP)SelectObject(hMem1DC, BackGroundhBitmap); // 배경비트맵 사용
 		BitBlt(hMem2DC, 0, 0, 4000, 4000, hMem1DC, 0, 0, SRCCOPY); // 배경 그리기
 		SelectObject(hMem1DC, oldBitmap); // 이전 비트맵으로 되돌리기
@@ -218,19 +218,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			Rt.SetRtTearRect();
 			Rt.Draw(hMem2DC, hMem1DC); // Rt 눈물 그리기
 		}
-		else if(isPlayerDead){
+		else if (isPlayerDead) {
 			HBITMAP DoldBitmap = (HBITMAP)SelectObject(hMem1DC, DieBitmap);
 			if (MoveCheck == 9) {
 				TransparentBlt(hMem2DC, player.DieRect.left, player.DieRect.top, 29 * 2, 34 * 2, hMem1DC, 0, 0, 29, 34, RGB(255, 200, 200));
 			}
 			else if (MoveCheck == 10) {
-				TransparentBlt(hMem2DC, player.DieRect.left, player.DieRect.top, 80, 28*2, hMem1DC, 30, 0, 37, 28, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, player.DieRect.left, player.DieRect.top, 80, 28 * 2, hMem1DC, 30, 0, 37, 28, RGB(255, 200, 200));
 
 			}
-			
+
 			SelectObject(hMem1DC, DoldBitmap);
 		}
-		
+
 
 		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
 			monster.Draw(hMem2DC);
@@ -243,7 +243,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		if (BoomCheck) {
 			DrawBoom(hMem2DC, hMem1DC, BoomX, BoomY);
 		}
-		
+
 		// 플레이어 체력 UI 그리기
 		HeartRect.left = player.Came.left + 10;
 		HeartRect.right = HeartRect.left + 45;
@@ -255,7 +255,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
 			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
 			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
-		}else if (player.hp > 40 && player.hp <= 50) {
+		}
+		else if (player.hp > 40 && player.hp <= 50) {
 			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
 			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 0, 0, 15, 14, RGB(255, 200, 200));
 			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 16, 0, 15, 14, RGB(255, 200, 200));
@@ -279,7 +280,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 16, 0, 15, 14, RGB(255, 200, 200));
 			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
 			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
-		}else if(player.hp <= 0) {
+		}
+		else if (player.hp <= 0) {
 			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
 			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
 			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, hMem1DC, 32, 0, 15, 14, RGB(255, 200, 200));
@@ -304,7 +306,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		miniMapRect.left = miniMapRect.right - 200;
 		miniMapRect.bottom = player.Came.bottom - 10;  // 카메라 기준 아래에서 -10px
 		miniMapRect.top = miniMapRect.bottom - 200;
-		
+
 		StretchBlt(
 			hMem2DC, miniMapRect.left, miniMapRect.top, 200, 200,   // 대상 위치 및 크기
 			hMem2DC, 0, 0, 4000, 4000,                          // 원본 (전체 월드)
@@ -469,9 +471,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				if (MoveCount >= 9) MoveCount = 0;
 			}
 		}
-		
+
 		// 플레이어 주금
-		if(player.hp <= 0) {
+		if (player.hp <= 0) {
 			MoveCheck = player.SetDieRect(DeltaTime);
 			isPlayerDead = TRUE;
 			//MessageBox(hWnd, _T("Game Over!"), _T("Game Over"), MB_OK | MB_ICONERROR);
@@ -481,7 +483,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		// 레벨업 후 선택지
 		if (player.LevelUp) {
 			showLevelUpChoices = true;
-			
+
 			for (int i = 0; i < 3; i++) {
 				LevelUpChoices[i] = rand() % 3 + 1;
 
@@ -595,9 +597,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 }
 
 void DrawBoom(HDC nhDC, HDC nhMemDC, int x, int y) { // 눈물 폭발 그리기 함수
-	
+
 	HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, TearsBoomBitMap[BoomCount]); // 0번 비트맵 사용
-	TransparentBlt(nhDC, x-8, y-8, 64, 64, nhMemDC, 0, 0, 64, 64, RGB(255, 200, 200)); // 눈물 그리기
+	TransparentBlt(nhDC, x - 8, y - 8, 64, 64, nhMemDC, 0, 0, 64, 64, RGB(255, 200, 200)); // 눈물 그리기
 	SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 
 };
@@ -637,4 +639,3 @@ void DrawMiniMap(HDC hDC, const PLAYER1& player, const std::vector<MONSTER>& mon
 
 	BitBlt(hDC, miniMapX, miniMapY, 200, 200, hMiniMapDC, 0, 0, SRCCOPY);
 }
-
