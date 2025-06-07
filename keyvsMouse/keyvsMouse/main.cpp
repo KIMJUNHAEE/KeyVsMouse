@@ -9,6 +9,7 @@
 #include "MONSTER.h"
 #include "TEARS.h"
 #include "RoundTear.h"
+#include "SHOP.h"
 
 #define WINDOW_WIDTH 4000
 #define WINDOW_HEIGHT 4000
@@ -109,6 +110,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static std::vector<TEARS> tears; // 눈물 백터 선언
 
 	static int Mtype = 0;
+
+	static SHOP shop;
 
 	switch (iMessage) {
 	case WM_CREATE:
@@ -308,6 +311,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			SRCCOPY
 		);*/
 
+		shop.DrawShop(hMem2DC);
 		DrawMiniMap(hMem2DC, player, monsters);
 		BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
 		

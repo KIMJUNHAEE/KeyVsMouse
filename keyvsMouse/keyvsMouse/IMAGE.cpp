@@ -5,6 +5,7 @@ CImage IMGparabite[8];
 CImage IMGisaac[17];
 CImage IMGmom[23];
 CImage IMGdeath[12];
+CImage IMGshop;
 
 void ImageCreate() {
 	for (int i = 0; i < 14; i++) {
@@ -32,5 +33,8 @@ void ImageCreate() {
 		_stprintf_s(filePath, TEXT("Monster_graphics/effect_01_death_0%d.png"), i);
 		IMGdeath[i].Load(filePath);
 	}
+	TCHAR filePath[50];
+	_stprintf_s(filePath, TEXT("Play_graphics/shop.png"));
+	IMGshop.Load(filePath);
 }
 

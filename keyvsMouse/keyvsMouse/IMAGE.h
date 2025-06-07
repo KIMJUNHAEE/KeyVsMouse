@@ -6,4 +6,5 @@ extern CImage IMGparabite[8];
 extern CImage IMGisaac[17];
 extern CImage IMGmom[23];
 extern CImage IMGdeath[12];
+extern CImage IMGshop;
 void ImageCreate();
