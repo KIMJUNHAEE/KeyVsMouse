@@ -9,7 +9,7 @@ RoundTear::RoundTear(int Px, int Py) {
 	int x = Px + rad;
 	int y = Py + rad;
 	angle = 0.0f;
-	speed = 10;
+	speed = 8;
 
 	TCHAR filePath[256];
 	_stprintf_s(filePath, _T("P1_graphics/tears_1.bmp")); // ¿¹½Ã: "resources/player0.bmp", "resources/player1.bmp" µî

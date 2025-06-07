@@ -230,7 +230,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		if (BoomCheck) {
 			DrawBoom(hMem2DC, hMem1DC, BoomX, BoomY);
-			BoomCheck = FALSE;
 		}
 		
 		// 플레이어 체력 UI 그리기
@@ -351,14 +350,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				}
 			}
 
-			/*if (BoomCheck) {
+			// 눈물 터짐
+			if (BoomCheck) {
 				BoomCount++;
 				if (BoomCount >= 16) {
 					BoomCheck = FALSE;
 					BoomCount = 0;
 				}
-				break;
-			}*/
+			}
 		}
 
 		POINT point = { player.Tx, player.Ty };
