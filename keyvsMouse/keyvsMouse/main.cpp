@@ -91,10 +91,10 @@ int WINAPI WinMain(HINSTANCE hlnstance, HINSTANCE hPrevlnstance, LPSTR lpszCmdPa
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
-	HDC hDC, hMem1DC, hMem2DC, hMem3DC;
+	HDC hDC, hMem1DC, hMem2DC, hMem3DC, hMem4DC;
 	HBITMAP OldBit[3];
 	static HBITMAP BackGroundhBitmap;
-	HBITMAP hBitmap, hOldBitmap;
+	HBITMAP hBitmap, hOldBitmap, hShopBitmap;
 
 	static RECT ViewRect;
 	
@@ -311,16 +311,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			SRCCOPY
 		);*/
 
-		shop.DrawShop(hMem2DC);
 		DrawMiniMap(hMem2DC, player, monsters);
+		shop.DrawShop(hMem2DC, player.Came.left, player.Came.bottom - 210);
 		BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
-		
+
 		SelectObject(hMem2DC, hOldBitmap);
 		DeleteObject(hBitmap);
 		DeleteDC(hMem2DC);
 		DeleteDC(hMem1DC);
-
-		
 
 		EndPaint(hWnd, &ps);
 		break;

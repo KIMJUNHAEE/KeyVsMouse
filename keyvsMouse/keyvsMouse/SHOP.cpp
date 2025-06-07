@@ -2,7 +2,6 @@
 
 SHOP::SHOP()
 {
-	x[0] = 0; y[0] = 790;
 	coin = 0;
 
 	Xsize = 800;
@@ -26,7 +25,7 @@ void SHOP::SetType(int n, int ntype)
 {
 }
 
-void SHOP::DrawShop(HDC hDC)
+void SHOP::DrawShop(HDC hDC, int x, int y)
 {
-	IMGshop.Draw(hDC, x[0], y[0], Xsize, Ysize, 0, 0, Xsize, Ysize);
+	IMGshop.Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 }
