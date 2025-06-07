@@ -91,10 +91,10 @@ int WINAPI WinMain(HINSTANCE hlnstance, HINSTANCE hPrevlnstance, LPSTR lpszCmdPa
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
-	HDC hDC, hMem1DC, hMem2DC, hMem3DC;
+	HDC hDC, hMem1DC, hMem2DC, hMem3DC, hMem4DC;
 	HBITMAP OldBit[3];
 	static HBITMAP BackGroundhBitmap;
-	HBITMAP hBitmap, hOldBitmap;
+	HBITMAP hBitmap, hOldBitmap, hShopBitmap;
 
 	static RECT ViewRect;
 
