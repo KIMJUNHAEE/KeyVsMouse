@@ -112,6 +112,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static int Mtype = 0;
 
 	static SHOP shop;
+	static bool clicked;
+	static bool draw = true;
 
 	switch (iMessage) {
 	case WM_CREATE:
@@ -315,6 +317,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		DrawMiniMap(hMem2DC, player, monsters);
 		shop.DrawShop(hMem2DC, player.Came.left, player.Came.bottom - 210);
+		if (clicked) {
+			if (draw) {
+				IMGparabite[3].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
+				draw = !draw;
+			}
+			else {
+				draw = !draw;
+			}
+		}
 		BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
 
 		SelectObject(hMem2DC, hOldBitmap);
@@ -568,25 +579,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_KEYUP:
 
 		break;
-	case WM_RBUTTONDOWN:
-		Mtype++;
-		break;
-
-	case WM_LBUTTONDOWN:
+	case WM_LBUTTONDOWN: {
 		worldX = cursor.x + player.Came.left;
 		worldY = cursor.y + player.Came.top;
 
-		monsters.emplace_back();
-		monsters.back().SetSpot(worldX, worldY);
-		monsters.back().SetRect();
-		monsters.back().SetMonster((Mtype % 3) + 1);
+		POINT Wcursor = { worldX, worldY };
+
+		RECT rect;
+		rect.left = player.Came.left + 100;
+		rect.top = player.Came.top + 800;
+		rect.right = player.Came.left + 300;
+		rect.bottom = player.Came.bottom;
+
+		if (PtInRect(&rect, Wcursor)) {
+			clicked = true;
+			Mtype = 2;
+		}
 
 		break;
+	}
+	case WM_LBUTTONUP: {
+		worldX = cursor.x + player.Came.left;
+		worldY = cursor.y + player.Came.top;
+		if (clicked) {
+			monsters.emplace_back();
+			monsters.back().SetSpot(worldX, worldY);
+			monsters.back().SetRect();
+			monsters.back().SetMonster(Mtype);
+			clicked = false;
+		}
+	}
 	case WM_MOUSEMOVE:
-
 		cursor.x = LOWORD(lParam);
 		cursor.y = HIWORD(lParam);
 
+		worldX = cursor.x + player.Came.left;
+		worldY = cursor.y + player.Came.top;
 		break;
 	case WM_DESTROY:
 		KillTimer(hWnd, 1); // 타이머 제거
