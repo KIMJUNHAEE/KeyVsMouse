@@ -4,6 +4,10 @@
 #include <cstdio> 
 #include <tchar.h>
 
+static HBITMAP RToldBitmap;
+static HBITMAP RtTearBitMap;
+static HDC RTBitDC;
+
 RoundTear::RoundTear(int Px, int Py) {
 	rad = 60;
 	int x = Px + rad;
@@ -17,7 +21,7 @@ RoundTear::RoundTear(int Px, int Py) {
 	if (RtTearBitMap == NULL) {
 		MessageBox(NULL, _T("비트맵 로딩 실패!"), _T("오류"), MB_OK);
 	}
-	
+	RTBitDC = CreateCompatibleDC(NULL);
 };
 
 RoundTear::~RoundTear() { // 눈물 소멸자
@@ -42,10 +46,10 @@ void RoundTear::Update(int Px, int Py, float DeltaTime) { // 눈물 업데이트 함수
 	SetRtTearRect();
 }; 
 
-void RoundTear::Draw(HDC nhDC, HDC nhMemDC) { // 눈물 그리기 함수
+void RoundTear::Draw(HDC nhDC) { // 눈물 그리기 함수
 	SetRtTearRect();
-	HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, RtTearBitMap);
-	TransparentBlt(nhDC, RtRect.left, RtRect.top, (RtRect.right - RtRect.left), (RtRect.bottom - RtRect.top), nhMemDC, 18, 0, 8, 8, RGB(255, 200, 200));
-	SelectObject(nhMemDC, oldBitmap);
+	RToldBitmap = (HBITMAP)SelectObject(RTBitDC, RtTearBitMap);
+	TransparentBlt(nhDC, RtRect.left, RtRect.top, (RtRect.right - RtRect.left), (RtRect.bottom - RtRect.top), RTBitDC, 18, 0, 8, 8, RGB(255, 200, 200));
+	SelectObject(RTBitDC, RToldBitmap);
 }; 
 

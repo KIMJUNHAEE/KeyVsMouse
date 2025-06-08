@@ -4,9 +4,7 @@
 class RoundTear
 {
 private:
-
-	HBITMAP RtTearBitMap;
-
+	
 
 public:
 	int x, y;
@@ -21,7 +19,7 @@ public:
 
 	void SetRtTearRect(); // 눈물 RECT 설정 함수
 	void Update(int Px, int Py, float DeltaTime); // 눈물 업데이트 함수
-	void Draw(HDC nhDC, HDC nhMemDC); // 눈물 그리기 함수
+	void Draw(HDC nhDC); // 눈물 그리기 함수
 
 };
 

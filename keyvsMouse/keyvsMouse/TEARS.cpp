@@ -4,9 +4,9 @@
 #include <cstdio> 
 #include <tchar.h>
 
-HBITMAP TearsBitMap[3]; // 눈물 비트맵
-HDC TearBitDc = NULL; // 눈물 비트맵 DC
-HBITMAP oldBitmap = NULL;
+static HBITMAP TearsBitMap[3]; // 눈물 비트맵
+static HDC TearBitDc = NULL; // 눈물 비트맵 DC
+static HBITMAP TearoldBitmap = NULL;
 
 void TEARS::LoadTearsBitMap() {
 	TCHAR filePath[256];
@@ -18,8 +18,6 @@ void TEARS::LoadTearsBitMap() {
 		}
 	}
 	TearBitDc = CreateCompatibleDC(NULL); // 눈물 비트맵 DC 생성
-	oldBitmap = (HBITMAP)SelectObject(TearBitDc, TearsBitMap[0]); // 0번 비트맵 사용
-
 }
 
 
@@ -80,15 +78,11 @@ void TEARS::Update(float DeltaTime) {
 
 void TEARS::Draw(HDC nhDC) {
 	SetTearRect();
+	TearoldBitmap = (HBITMAP)SelectObject(TearBitDc, TearsBitMap[0]); // 0번 비트맵 사용
 	TransparentBlt(nhDC, TearRect.left, TearRect.top, (TearRect.right - TearRect.left), (TearRect.bottom - TearRect.top), TearBitDc, 0, 0, 17, 17, RGB(255, 200, 200)); // 눈물 그리기
-	//SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	SelectObject(TearBitDc, TearoldBitmap); // 이전 비트맵으로 되돌리기
 }
 
 bool TEARS::IsOutOfRange() { // 거리 초과 함수
 	return !isActive;
 };
-
-
-
-
-

@@ -4,7 +4,7 @@
 
 static HDC P1BitDC = NULL; // 플레이어 비트맵 DC
 static HBITMAP P1BitMap[6]; // 플레이어 비트맵
-static HBITMAP oldBitmap = NULL; // 이전 비트맵 저장용
+static HBITMAP PlayeroldBitmap = NULL; // 이전 비트맵 저장용
 
 PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange, int nsize, int nAct, int nview) { // 생성자
 	hp = nhp;
@@ -28,17 +28,18 @@ PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange
 	}
 
 	P1BitDC = CreateCompatibleDC(NULL); // 메모리 DC 생성
-	oldBitmap = (HBITMAP)SelectObject(P1BitDC, P1BitMap[0]);
-
-
 };
 
 PLAYER1::~PLAYER1() { // 소멸자
 	for (int i = 0; i < 6; i++) {
 		if (P1BitMap[i]) {
-			DeleteObject(P1BitMap[i]);  // GDI 리소스 해제
-			P1BitMap[i] = nullptr;      // 포인터 무효화 (안전)
+			DeleteObject(P1BitMap[i]);
+			P1BitMap[i] = nullptr;
 		}
+	}
+	if (P1BitDC) {
+		DeleteDC(P1BitDC);
+		P1BitDC = nullptr;
 	}
 };
 
@@ -219,19 +220,19 @@ void PLAYER1::Draw(HDC nhDC) { // 출력 dc, 메모리 dc 받음, 정지상태 그리기
 	SetHeadRect();
 	SetBodyRect();
 	view = down; // 시선 설정
-
+	PlayeroldBitmap = (HBITMAP)SelectObject(P1BitDC, P1BitMap[0]);
 	//몸통 메모리 -> 출력디시로
 	TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 5, 44, 21, 14, RGB(255, 200, 200));
 	//머리 메모리 -> 출력디시로
 	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), P1BitDC, 0, 0, 31, 26, RGB(255, 200, 200));
-	//SelectObject(nMemDC, oldBitmap);
+	SelectObject(P1BitDC, PlayeroldBitmap);
 }; // 그리기
 
 void PLAYER1::DMDraw(HDC nhDC, int nCount) { // 아래로 움직임 그리기
 	SetHeadRect();
 	SetBodyRect();
 	view = down; // 시선 설정
-	
+	PlayeroldBitmap = (HBITMAP)SelectObject(P1BitDC, P1BitMap[0]);
 	if (nCount == 0) {
 		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 197, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
@@ -264,7 +265,7 @@ void PLAYER1::DMDraw(HDC nhDC, int nCount) { // 아래로 움직임 그리기
 	}
 	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), P1BitDC, 0, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
 
-	//SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	SelectObject(P1BitDC, PlayeroldBitmap); // 이전 비트맵으로 되돌리기
 
 };
 
@@ -272,7 +273,7 @@ void PLAYER1::UMDraw(HDC nhDC, int nCount) { // 위로 움직임 그리기
 	SetHeadRect();
 	SetBodyRect();
 	view = up; // 시선 설정	
-
+	PlayeroldBitmap = (HBITMAP)SelectObject(P1BitDC, P1BitMap[0]);
 	if (nCount == 9) {
 		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 197, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
@@ -305,7 +306,7 @@ void PLAYER1::UMDraw(HDC nhDC, int nCount) { // 위로 움직임 그리기
 	}
 	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), P1BitDC, 128, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
 
-	//SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	SelectObject(P1BitDC, PlayeroldBitmap); // 이전 비트맵으로 되돌리기
 
 };
 
@@ -313,7 +314,7 @@ void PLAYER1::RMDraw(HDC nhDC, int nCount) { // 오른쪽으로 움직임 그리기
 	SetHeadRect();
 	SetBodyRect();
 	view = right; // 시선 설정
-	
+	PlayeroldBitmap = (HBITMAP)SelectObject(P1BitDC, P1BitMap[0]);
 	if (nCount == 0) {
 		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 5, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
@@ -347,7 +348,7 @@ void PLAYER1::RMDraw(HDC nhDC, int nCount) { // 오른쪽으로 움직임 그리기
 
 	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), P1BitDC, 64, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
 
-	//SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	SelectObject(P1BitDC, PlayeroldBitmap); // 이전 비트맵으로 되돌리기
 
 };
 
@@ -355,7 +356,7 @@ void PLAYER1::LMDraw(HDC nhDC, int nCount) { // 왼쪽으로 움직임 그리기
 	SetHeadRect();
 	SetBodyRect();
 	view = left; // 시선 설정
-	
+	PlayeroldBitmap = (HBITMAP)SelectObject(P1BitDC, P1BitMap[0]);
 	if (nCount == 0) {
 		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 70, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
@@ -389,7 +390,7 @@ void PLAYER1::LMDraw(HDC nhDC, int nCount) { // 왼쪽으로 움직임 그리기
 
 	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), P1BitDC, 259, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
 
-	//SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	SelectObject(P1BitDC, PlayeroldBitmap); // 이전 비트맵으로 되돌리기
 };
 
 int PLAYER1::ShootTime(float deltaTime) { // 공격 타이머 업데이트 함수
