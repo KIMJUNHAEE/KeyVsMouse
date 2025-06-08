@@ -33,7 +33,6 @@ public:
 	RECT DieRect; // 플레이어 사망 그리기용 좌표
 	RECT Came; // 카메라 영역 (1000,1000)
 	float InTimer = 0.0f; // 내부 타이머
-	HBITMAP P1BitMap[6]; // 플레이어 비트맵
 	bool LevelUp = FALSE; // 레벨업 여부
 
 	// 값 변경 함수
@@ -64,12 +63,12 @@ public:
 
 	// 부가요소 함수
 	void Update(float deltaTime); // 위치 업데이트
-	void Draw(HDC nhDC, HDC nMemDC); // 정지 상태 그리기
-	void DMDraw(HDC nhDC, HDC nMemDC, int nCount); // 아래로 움직임 그리기
-	void UMDraw(HDC nhDC, HDC nMemDC, int nCount); // 위로 움직임 그리기
-	void RMDraw(HDC nhDC, HDC nMemDC, int nCount); // 오른쪽으로 움직임 그리기
-	void LMDraw(HDC nhDC, HDC nMemDC, int nCount); // 왼쪽으로 움직임 그리기
-	void ULMDraw(HDC nhDC, HDC nMemDC, int nCount); // 좌상단 대각선 움직임 그리기
+	void Draw(HDC nhDC); // 정지 상태 그리기
+	void DMDraw(HDC nhDC, int nCount); // 아래로 움직임 그리기
+	void UMDraw(HDC nhDC, int nCount); // 위로 움직임 그리기
+	void RMDraw(HDC nhDC, int nCount); // 오른쪽으로 움직임 그리기
+	void LMDraw(HDC nhDC, int nCount); // 왼쪽으로 움직임 그리기
+	void ULMDraw(HDC nhDC, int nCount); // 좌상단 대각선 움직임 그리기
 	int ShootTime(float deltaTime); // 공격 타이머 업데이트
 	void AddLp(int nLp); // 플레이어 레벨 증가 함수
 
