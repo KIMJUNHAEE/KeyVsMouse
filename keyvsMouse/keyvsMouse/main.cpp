@@ -19,13 +19,7 @@ int worldY; // 마우스->월드 y좌표
 int MoveCheck = 0; // 0: 정지, 1: 위, 2: 아래, 3: 왼쪽, 4: 오른쪽
 int MoveCount = 0; // 움직임 카운트 (애니메이션 프레임을 위한 카운트)
 
-float dx; // 플레이어-몬스터 거리 x
-float dy; // 플레이어-몬스터 거리 y
-float Length; // 플레이어-몬스터 거리
-float MinLength = 10000;// 플레이어-몬스터 최소 거리
-float stocktime = 1.0f;
-float closestX = 0, closestY = 0;
-float minDist = FLT_MAX;
+// 플레이어 눈물 폭발 관련 변수
 int BoomX = 0;
 int BoomY = 0;
 bool BoomCheck = FALSE;
@@ -33,6 +27,7 @@ int BoomCount = 0;
 void DrawBoom(HDC nhDC, HDC nhMemDC, int x, int y);
 HBITMAP TearsBoomBitMap[15];
 
+// 플레이어 체력 UI 관련 변수
 RECT HeartRect;
 HBITMAP HeatBitmap;
 
@@ -44,6 +39,7 @@ bool showLevelUpChoices = false;
 int LevelUpChoices[3]; // 선택지 배열
 char LC[3][100]; // 선택지 텍스트
 
+//미니맵 관련 변수
 HDC hMiniMapDC = NULL;
 HBITMAP hMiniMapBitmap = NULL;
 void DrawMiniMap(HDC hDC, const PLAYER1& player, const std::vector<MONSTER>& monsters);
@@ -91,15 +87,13 @@ int WINAPI WinMain(HINSTANCE hlnstance, HINSTANCE hPrevlnstance, LPSTR lpszCmdPa
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
-	HDC hDC, hMem1DC, hMem2DC, hMem3DC;
-	HBITMAP OldBit[3];
-	static HBITMAP BackGroundhBitmap;
-	HBITMAP hBitmap, hOldBitmap;
+
+	static HDC hDC, hMem1DC, hMem2DC;
+	static HBITMAP BackGroundhBitmap, hBitmap, hOldBitmap;
+
 
 	static RECT ViewRect;
 
-	static HPEN hPen, hOldPen;
-	static HBRUSH hBrush, hOldBrush;
 	static PLAYER1 player(60, 500, 400, 5, 1.0f, 10, 2, 0, down); // 생성자
 	static RoundTear Rt(player.Tx, player.Ty); // 눈물 생성자
 
@@ -118,6 +112,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	switch (iMessage) {
 	case WM_CREATE:
 
+		hMem1DC = CreateCompatibleDC(NULL);
+		hMem2DC = CreateCompatibleDC(NULL);
+
+		// 비트맵 생성 (카메라 크기에 맞게 1000x1000)
+		hBitmap = CreateCompatibleBitmap(GetDC(hWnd), 1000, 1000);
+		SelectObject(hMem2DC, hBitmap);
+
+		TEARS::LoadTearsBitMap();
+		player.SetCamera();
+
+		// 눈물 폭발 비트맵 로드
 		TCHAR Tb_filePath[256];
 		for (int i = 0; i < 15; i++) {
 			_stprintf_s(Tb_filePath, _T("P1_graphics/Tb_%d.bmp"), i + 1); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
@@ -126,12 +131,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				MessageBox(NULL, _T("비트맵 로딩 실패!"), _T("오류"), MB_OK);
 			}
 		}
-
-		ImageCreate();
-		GetClientRect(hWnd, &ViewRect);
-
-		player.SetCamera();
-
 		// 배경 이미지 로드
 		TCHAR BGfilepath[256];
 		_stprintf_s(BGfilepath, _T("Play_graphics/background.bmp")); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
@@ -140,21 +139,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			MessageBox(hWnd, _T("Failed to load background image"), _T("Error"), MB_OK | MB_ICONERROR);
 			return -1;
 		}
-
-		// Heart 이미지 로드
-		TCHAR Heartfilepath[256];
-		_stprintf_s(Heartfilepath, _T("P1_graphics/ui_hearts.bmp")); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
-		HeatBitmap = (HBITMAP)LoadImage(NULL, Heartfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-		if (HeatBitmap == NULL) {
-			MessageBox(hWnd, _T("Failed to load ui_hearts image"), _T("Error"), MB_OK | MB_ICONERROR);
-			return -1;
-		}
-
-		HeartRect.left = player.Came.left + 10;
-		HeartRect.right = HeartRect.left + 49;
-		HeartRect.top = player.Came.top + 10;
-		HeartRect.bottom = HeartRect.top + 15;
-
 		// 플레이어 사망 이미지 로드
 		TCHAR DIefilepath[256];
 		_stprintf_s(DIefilepath, _T("P1_graphics/DieP.bmp")); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
@@ -163,11 +147,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			MessageBox(hWnd, _T("Failed to load DieP image"), _T("Error"), MB_OK | MB_ICONERROR);
 			return -1;
 		}
+		// Heart 이미지 로드
+		TCHAR Heartfilepath[256];
+		_stprintf_s(Heartfilepath, _T("P1_graphics/ui_hearts.bmp")); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
+		HeatBitmap = (HBITMAP)LoadImage(NULL, Heartfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		if (HeatBitmap == NULL) {
+			MessageBox(hWnd, _T("Failed to load ui_hearts image"), _T("Error"), MB_OK | MB_ICONERROR);
+			return -1;
+		}
+		HeartRect.left = player.Came.left + 10;
+		HeartRect.right = HeartRect.left + 49;
+		HeartRect.top = player.Came.top + 10;
+		HeartRect.bottom = HeartRect.top + 15;
 
-		//미니맵 영역 설정
-		//static RECT miniMapRect;
 
-
+		ImageCreate();
+		GetClientRect(hWnd, &ViewRect);
 
 		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
 		break;
@@ -190,31 +185,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		if (!isPlayerDead) {
 			if (MoveCheck == 0) {
-				player.Draw(hMem2DC, hMem1DC);
+				player.Draw(hMem2DC);
 			}
 			else if (MoveCheck == 1) {
-				player.UMDraw(hMem2DC, hMem1DC, MoveCount);
+				player.UMDraw(hMem2DC, MoveCount);
 			}
 			else if (MoveCheck == 2) {
-				player.DMDraw(hMem2DC, hMem1DC, MoveCount);
+				player.DMDraw(hMem2DC, MoveCount);
 			}
 			else if (MoveCheck == 3) {
-				player.LMDraw(hMem2DC, hMem1DC, MoveCount);
+				player.LMDraw(hMem2DC, MoveCount);
 			}
 			else if (MoveCheck == 4) {
-				player.RMDraw(hMem2DC, hMem1DC, MoveCount);
+				player.RMDraw(hMem2DC, MoveCount);
 			}
 			else if (MoveCheck == 5) {
-				player.LMDraw(hMem2DC, hMem1DC, MoveCount);
+				player.LMDraw(hMem2DC, MoveCount);
 			}
 			else if (MoveCheck == 6) {
-				player.RMDraw(hMem2DC, hMem1DC, MoveCount);
+				player.RMDraw(hMem2DC, MoveCount);
 			}
 			else if (MoveCheck == 7) {
-				player.LMDraw(hMem2DC, hMem1DC, MoveCount);
+				player.LMDraw(hMem2DC, MoveCount);
 			}
 			else if (MoveCheck == 8) {
-				player.RMDraw(hMem2DC, hMem1DC, MoveCount);
+				player.RMDraw(hMem2DC, MoveCount);
 			}
 			Rt.Update(player.Tx, player.Ty, DeltaTime);
 			Rt.SetRtTearRect();
@@ -239,7 +234,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 
 		for (auto& tear : tears) {
-			tear.Draw(hMem2DC, hMem1DC);
+			tear.Draw(hMem2DC);
 		}
 
 		if (BoomCheck) {
@@ -303,17 +298,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 40, LVbuf, strlen(LVbuf));
 		TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 60, LPbuf, strlen(LPbuf));
 
-		// 미니맵 그리기
-		/*miniMapRect.right = player.Came.right - 10;  // 카메라 기준 우측에서 -10px
-		miniMapRect.left = miniMapRect.right - 200;
-		miniMapRect.bottom = player.Came.bottom - 10;  // 카메라 기준 아래에서 -10px
-		miniMapRect.top = miniMapRect.bottom - 200;
-
-		StretchBlt(
-			hMem2DC, miniMapRect.left, miniMapRect.top, 200, 200,   // 대상 위치 및 크기
-			hMem2DC, 0, 0, 4000, 4000,                          // 원본 (전체 월드)
-			SRCCOPY
-		);*/
 
 		DrawMiniMap(hMem2DC, player, monsters);
 		shop.DrawShop(hMem2DC, player.Came.left, player.Came.bottom - 210);
@@ -617,6 +601,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		worldY = cursor.y + player.Came.top;
 		break;
 	case WM_DESTROY:
+		DeleteObject(hBitmap);
+		DeleteObject(BackGroundhBitmap);
+		DeleteObject(HeatBitmap);
+		DeleteObject(DieBitmap);
+		for (int i = 0; i < 15; i++) {
+			DeleteObject(TearsBoomBitMap[i]);
+		}
+		DeleteDC(hMem1DC);
+		DeleteDC(hMem2DC);
 		KillTimer(hWnd, 1); // 타이머 제거
 		PostQuitMessage(0);
 		break;

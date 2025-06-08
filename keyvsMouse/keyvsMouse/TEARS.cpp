@@ -4,27 +4,26 @@
 #include <cstdio> 
 #include <tchar.h>
 
+HBITMAP TearsBitMap[3]; // 눈물 비트맵
+HDC TearBitDc = NULL; // 눈물 비트맵 DC
+HBITMAP oldBitmap = NULL;
 
-TEARS::TEARS(int Px, int Py) { // 생성자
-
+void TEARS::LoadTearsBitMap() {
 	TCHAR filePath[256];
 	for (int i = 0; i < 3; i++) {
-		_stprintf_s(filePath, _T("P1_graphics/tears_%d.bmp"), i+1); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
+		_stprintf_s(filePath, _T("P1_graphics/tears_%d.bmp"), i + 1); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
 		TearsBitMap[i] = (HBITMAP)LoadImage(NULL, filePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		if (TearsBitMap[i] == NULL) {
 			MessageBox(NULL, _T("비트맵 로딩 실패!"), _T("오류"), MB_OK);
 		}
 	}
+	TearBitDc = CreateCompatibleDC(NULL); // 눈물 비트맵 DC 생성
+	oldBitmap = (HBITMAP)SelectObject(TearBitDc, TearsBitMap[0]); // 0번 비트맵 사용
 
-	TCHAR Tb_filePath[256];
-	for (int i = 0; i < 15; i++) {
-		_stprintf_s(Tb_filePath, _T("P1_graphics/Tb_%d.bmp"), i + 1); // 예시: "resources/player0.bmp", "resources/player1.bmp" 등
-		TearsBoomBitMap[i] = (HBITMAP)LoadImage(NULL, Tb_filePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-		if (TearsBoomBitMap[i] == NULL) {
-			MessageBox(NULL, _T("비트맵 로딩 실패!"), _T("오류"), MB_OK);
-		}
-	}
+}
 
+
+TEARS::TEARS(int Px, int Py) { // 생성자
 	x = Px; // 눈물의 시작 x좌표
 	y = Py; // 눈물의 시작 y좌표	
 	size = 10;
@@ -44,8 +43,6 @@ TEARS::TEARS(int Px, int Py) { // 생성자
 
 
 TEARS::~TEARS() { // 소멸자
-
-
 }; 
 
 void TEARS::SetTearRect() { // 눈물 RECT 설정 함수
@@ -81,21 +78,11 @@ void TEARS::Update(float DeltaTime) {
 	SetTearRect();
 };
 
-void TEARS::Draw(HDC nhDC, HDC nhMemDC) {
+void TEARS::Draw(HDC nhDC) {
 	SetTearRect();
-	HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, TearsBitMap[0]); // 0번 비트맵 사용
-	TransparentBlt(nhDC, TearRect.left, TearRect.top, (TearRect.right - TearRect.left), (TearRect.bottom - TearRect.top), nhMemDC, 0, 0, 17, 17, RGB(255, 200, 200)); // 눈물 그리기
-	SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	TransparentBlt(nhDC, TearRect.left, TearRect.top, (TearRect.right - TearRect.left), (TearRect.bottom - TearRect.top), TearBitDc, 0, 0, 17, 17, RGB(255, 200, 200)); // 눈물 그리기
+	//SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 }
-
-void TEARS::DrawBoom(HDC nhDC, HDC nhMemDC) {
-	SetTearRect();
-	for (int i = 0; i < 15; i++) {
-		HBITMAP oldBitmap = (HBITMAP)SelectObject(nhMemDC, TearsBoomBitMap[i]); // 0번 비트맵 사용
-		TransparentBlt(nhDC, TearRect.left, TearRect.top, (TearRect.right - TearRect.left), (TearRect.bottom - TearRect.top), nhMemDC, 0, 0, 64, 1, RGB(255, 200, 200)); // 눈물 그리기
-		SelectObject(nhMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
-	}
-};
 
 bool TEARS::IsOutOfRange() { // 거리 초과 함수
 	return !isActive;

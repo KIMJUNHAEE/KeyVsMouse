@@ -2,6 +2,10 @@
 #include <cstdio> 
 #include <tchar.h>
 
+static HDC P1BitDC = NULL; // 플레이어 비트맵 DC
+static HBITMAP P1BitMap[6]; // 플레이어 비트맵
+static HBITMAP oldBitmap = NULL; // 이전 비트맵 저장용
+
 PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange, int nsize, int nAct, int nview) { // 생성자
 	hp = nhp;
 	x = nx;
@@ -22,6 +26,11 @@ PLAYER1::PLAYER1(int nhp, int nx, int ny, int nMspeed, float nAspeed, int nrange
 			MessageBox(NULL, _T("비트맵 로딩 실패!"), _T("오류"), MB_OK);
 		}
 	}
+
+	P1BitDC = CreateCompatibleDC(NULL); // 메모리 DC 생성
+	oldBitmap = (HBITMAP)SelectObject(P1BitDC, P1BitMap[0]);
+
+
 };
 
 PLAYER1::~PLAYER1() { // 소멸자
@@ -206,187 +215,181 @@ void PLAYER1::Update(float deltaTime) { // 내부 타이머 업데이트 함수
 
 };
 
-void PLAYER1::Draw(HDC nhDC, HDC nMemDC) { // 출력 dc, 메모리 dc 받음, 정지상태 그리기
+void PLAYER1::Draw(HDC nhDC) { // 출력 dc, 메모리 dc 받음, 정지상태 그리기
 	SetHeadRect();
 	SetBodyRect();
 	view = down; // 시선 설정
-	HBITMAP oldBitmap = (HBITMAP)SelectObject(nMemDC, P1BitMap[0]);
-	
+
 	//몸통 메모리 -> 출력디시로
-	TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 44, 21, 14, RGB(255, 200, 200));
+	TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 5, 44, 21, 14, RGB(255, 200, 200));
 	//머리 메모리 -> 출력디시로
-	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), nMemDC, 0, 0, 31, 26, RGB(255, 200, 200));
-	SelectObject(nMemDC, oldBitmap);
+	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), P1BitDC, 0, 0, 31, 26, RGB(255, 200, 200));
+	//SelectObject(nMemDC, oldBitmap);
 }; // 그리기
 
-void PLAYER1::DMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 아래로 움직임 그리기
+void PLAYER1::DMDraw(HDC nhDC, int nCount) { // 아래로 움직임 그리기
 	SetHeadRect();
 	SetBodyRect();
 	view = down; // 시선 설정
-	HBITMAP oldBitmap = (HBITMAP)SelectObject(nMemDC, P1BitMap[0]); // 아래로 움직임 비트맵 선택
 	
 	if (nCount == 0) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 197, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 197, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 1) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 229, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 229, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 2) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 5, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 3) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 37, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 37, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 4) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 70, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 70, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 5) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 101, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 101, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 6) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 133, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 133, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 7) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 165, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 165, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 8) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 197, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 197, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 9) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 228, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 228, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
-	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), nMemDC, 0, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
+	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), P1BitDC, 0, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
 
-	SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	//SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 
 };
 
-void PLAYER1::UMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 위로 움직임 그리기
+void PLAYER1::UMDraw(HDC nhDC, int nCount) { // 위로 움직임 그리기
 	SetHeadRect();
 	SetBodyRect();
-	view = up; // 시선 설정
-	HBITMAP oldBitmap = (HBITMAP)SelectObject(nMemDC, P1BitMap[0]); // 아래로 움직임 비트맵 선택
-	
+	view = up; // 시선 설정	
 
 	if (nCount == 9) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 197, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 197, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 8) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 229, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 229, 12, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 7) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 5, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 6) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 37, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 37, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 5) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 70, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 70, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 4) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 101, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 101, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 3) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 133, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 133, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 2) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 165, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 165, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 1) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 197, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 197, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 0) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 228, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 228, 44, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
-	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), nMemDC, 128, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
+	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), P1BitDC, 128, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
 
-	SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	//SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 
 };
 
-void PLAYER1::RMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 오른쪽으로 움직임 그리기
+void PLAYER1::RMDraw(HDC nhDC, int nCount) { // 오른쪽으로 움직임 그리기
 	SetHeadRect();
 	SetBodyRect();
 	view = right; // 시선 설정
-	HBITMAP oldBitmap = (HBITMAP)SelectObject(nMemDC, P1BitMap[0]); // 아래로 움직임 비트맵 선택
 	
 	if (nCount == 0) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 5, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 1) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 37, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기	
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 37, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기	
 	}
 	else if (nCount == 2) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 70, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 70, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 3) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 101, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 101, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 4) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 133, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 133, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 5) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 165, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 165, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 6) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 197, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 197, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 7) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 228, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 228, 76, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 8) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 5, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 9) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 37, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기	
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 37, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기	
 	}
 
-	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), nMemDC, 64, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
+	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), P1BitDC, 64, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
 
-	SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	//SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 
 };
 
-void PLAYER1::LMDraw(HDC nhDC, HDC nMemDC, int nCount) { // 왼쪽으로 움직임 그리기
+void PLAYER1::LMDraw(HDC nhDC, int nCount) { // 왼쪽으로 움직임 그리기
 	SetHeadRect();
 	SetBodyRect();
 	view = left; // 시선 설정
-	HBITMAP oldBitmap = (HBITMAP)SelectObject(nMemDC, P1BitMap[0]); // 아래로 움직임 비트맵 선택
 	
 	if (nCount == 0) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 70, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 70, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 1) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 101, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기	
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 101, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기	
 	}
 	else if (nCount == 2) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 133, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 133, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 3) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 165, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 165, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 4) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 197, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 197, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 5) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 228, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 228, 107, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 6) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 5, 127, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 5, 127, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 7) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 37, 127, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 37, 127, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 8) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 70, 127, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 70, 127, 21, 14, RGB(255, 200, 200)); // 몸통 그리기
 	}
 	else if (nCount == 9) {
-		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), nMemDC, 101, 127, 21, 14, RGB(255, 200, 200)); // 몸통 그리기	
+		TransparentBlt(nhDC, BodyRect.left, BodyRect.top, (BodyRect.right - BodyRect.left), (BodyRect.bottom - BodyRect.top), P1BitDC, 101, 127, 21, 14, RGB(255, 200, 200)); // 몸통 그리기	
 	}
 
-	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), nMemDC, 259, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
+	TransparentBlt(nhDC, HeadRect.left, HeadRect.top, (HeadRect.right - HeadRect.left), (HeadRect.bottom - HeadRect.top), P1BitDC, 259, 0, 31, 26, RGB(255, 200, 200)); // 머리 그리기
 
-	SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
+	//SelectObject(nMemDC, oldBitmap); // 이전 비트맵으로 되돌리기
 };
 
 int PLAYER1::ShootTime(float deltaTime) { // 공격 타이머 업데이트 함수
