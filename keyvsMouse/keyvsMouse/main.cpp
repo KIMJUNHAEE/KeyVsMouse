@@ -631,7 +631,7 @@ void DrawBoom(HDC nhDC, int x, int y) { // 눈물 폭발 그리기 함수
 
 void DrawMiniMap(HDC hDC, const PLAYER1& player, const std::vector<MONSTER>& monsters) {
 	// 1. 전체 배경 클리어 (배경 브러시 생성 및 정리)
-	HBRUSH bgBrush = CreateSolidBrush(RGB(220, 220, 220)); // 연회색 배경
+	HBRUSH bgBrush = CreateSolidBrush(RGB(70, 70, 70)); // 연회색 배경
 	HBRUSH oldBrush = (HBRUSH)SelectObject(hMiniMapDC, bgBrush);
 
 	RECT miniRect = { 0, 0, 200, 200 };
@@ -658,7 +658,7 @@ void DrawMiniMap(HDC hDC, const PLAYER1& player, const std::vector<MONSTER>& mon
 	DeleteObject(monsterBrush);
 
 	// 4. 플레이어 그리기 (파란 점)
-	HBRUSH playerBrush = CreateSolidBrush(RGB(0, 0, 255));
+	HBRUSH playerBrush = CreateSolidBrush(RGB(255, 200, 200));
 	oldBrush = (HBRUSH)SelectObject(hMiniMapDC, playerBrush);
 
 	int px = static_cast<int>(player.Tx * scaleX);
