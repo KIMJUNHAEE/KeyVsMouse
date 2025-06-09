@@ -140,6 +140,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static POINT cursor; // 마우스 커서 좌표
 	static float DeltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
 
+	static float ElapsedTime = 0.0f;  // 누적 경과 시간 (초)
+	static float TimeLimit = 300.0f; // 5분 = 300초
+	static int timeInSeconds;
+	static int minutes;
+	static int seconds;
+	static char Timebuf[6];
+
 	static std::vector<MONSTER> monsters; // 몬스터 벡터 선언
 	static std::vector<TEARS> tears; // 눈물 백터 선언
 
@@ -352,6 +359,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 40, LVbuf, strlen(LVbuf));
 			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 60, LPbuf, strlen(LPbuf));
 
+			sprintf_s(Timebuf, "%02d:%02d", minutes, seconds);
+			TextOutA(hMem2DC, player.Came.right - 60, player.Came.top + 40, Timebuf, strlen(Timebuf)); // 시간 표시
+
 			DrawMiniMap(hMem2DC, player, monsters); // 미니맵 그리기
 
 			//상점 그리기
@@ -405,6 +415,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_TIMER: {
+
+		ElapsedTime += DeltaTime; // 경과 시간 업데이트
+		timeInSeconds = static_cast<int>(ElapsedTime); // 초 단위로 변환
+		minutes = timeInSeconds / 60; // 분 단위
+		seconds = timeInSeconds % 60; // 초 단위
+
+		if(ElapsedTime >= TimeLimit) { 
+			MessageBox(hWnd, _T("Time's up! Game Over!"), _T("Game Over"), MB_OK | MB_ICONINFORMATION);
+			PostQuitMessage(0); // 게임 종료
+		}
+
 		player.SetHeadRect();
 		player.SetBodyRect();
 		player.SetTarget();
