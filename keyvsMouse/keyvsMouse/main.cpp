@@ -54,6 +54,10 @@ bool click_play = FALSE;
 bool click_exit = FALSE;
 HDC StartBitMapDC = NULL; // 시작 화면 DC
 HBITMAP StartBitMap = NULL; // 시작 화면 비트맵
+HDC KWinBitMapDC = NULL; // Key 승리 화면 DC
+HBITMAP KWinBitMap = NULL; // Key 승리 화면 비트맵
+HDC MWinBitMapDC = NULL; // Mouse 승리 화면 DC
+HBITMAP MWinBitMap = NULL; // Mouse 승리 화면 비트맵
 RECT StartRect; // 시작화면 사진영역
 HFONT hFont = CreateFont(
 	150,           // Height (150px)
@@ -141,11 +145,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static float DeltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
 
 	static float ElapsedTime = 0.0f;  // 누적 경과 시간 (초)
-	static float TimeLimit = 300.0f; // 5분 = 300초
+	static float TimeLimit = 10.0f; // 5분 = 300초
 	static int timeInSeconds;
 	static int minutes;
 	static int seconds;
 	static char Timebuf[6];
+	static bool TimeOver = FALSE; 
 
 	static std::vector<MONSTER> monsters; // 몬스터 벡터 선언
 	static std::vector<TEARS> tears; // 눈물 백터 선언
@@ -224,6 +229,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		StartRect.right = StartRect.left + 400;
 		StartRect.top = player.Came.top + 20;
 		StartRect.bottom = StartRect.top + 400;
+		// Key 승리 이미지 로드
+		TCHAR KeyWinfilepath[256];
+		_stprintf_s(KeyWinfilepath, _T("Play_graphics/KWin.bmp"));
+		KWinBitMap = (HBITMAP)LoadImage(NULL, KeyWinfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		if (KWinBitMap == NULL) {
+			MessageBox(hWnd, _T("Failed to load KvsM image"), _T("Error"), MB_OK | MB_ICONERROR);
+			return -1;
+		}
+		KWinBitMapDC = CreateCompatibleDC(NULL);
+		// Mouse 승리 이미지 로드
+		TCHAR MouseWinfilepath[256];
+		_stprintf_s(MouseWinfilepath, _T("Play_graphics/MWin.bmp"));
+		MWinBitMap = (HBITMAP)LoadImage(NULL, MouseWinfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		if (MWinBitMap == NULL) {
+			MessageBox(hWnd, _T("Failed to load KvsM image"), _T("Error"), MB_OK | MB_ICONERROR);
+			return -1;
+		}
+		MWinBitMapDC = CreateCompatibleDC(NULL);
 
 		ImageCreate();
 		GetClientRect(hWnd, &ViewRect);
@@ -381,7 +404,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					draw = !draw;
 				}
 			}
-
+			
 			BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
 
 			SelectObject(hMem2DC, hOldBitmap);
@@ -412,6 +435,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			SelectObject(hDC, hOldFont2); // 폰트 원복
 		}
 
+		// Key 승리!
+		if (TimeOver) {
+			SelectObject(KWinBitMapDC, KWinBitMap);
+			StretchBlt(hDC, StartRect.left, StartRect.top, StartRect.right - StartRect.left, StartRect.bottom - StartRect.top, KWinBitMapDC, 0, 0, 400, 400, SRCCOPY);
+			KillTimer(hWnd, 1); // 타이머 종료
+		}
+
+		// Mouse 승리!
+		if (isPlayerDead) {
+			SelectObject(MWinBitMapDC, MWinBitMap);
+			StretchBlt(hDC, StartRect.left, StartRect.top, StartRect.right - StartRect.left, StartRect.bottom - StartRect.top, MWinBitMapDC, 0, 0, 400, 400, SRCCOPY);
+		}
 		
 
 		EndPaint(hWnd, &ps);
@@ -428,8 +463,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		seconds = timeInSeconds % 60; // 초 단위
 
 		if(ElapsedTime >= TimeLimit) { 
-			MessageBox(hWnd, _T("Time's up! Game Over!"), _T("Game Over"), MB_OK | MB_ICONINFORMATION);
-			PostQuitMessage(0); // 게임 종료
+			TimeOver = TRUE;
 		}
 
 		player.SetHeadRect();
