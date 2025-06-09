@@ -27,8 +27,8 @@ bool BoomCheck = FALSE;
 int BoomCount = 0;
 void DrawBoom(HDC nhDC, int x, int y);
 HBITMAP TearsBoomBitMap[15];
-HBITMAP TearoldBitmap; 
-HDC TearhMemDC; 
+HBITMAP TearoldBitmap = NULL; 
+HDC TearhMemDC = NULL; 
 
 // 플레이어 체력 UI 관련 변수
 RECT HeartRect;
@@ -47,6 +47,42 @@ char LC[3][100]; // 선택지 텍스트
 HDC hMiniMapDC = NULL;
 HBITMAP hMiniMapBitmap = NULL;
 void DrawMiniMap(HDC hDC, const PLAYER1& player, const std::vector<MONSTER>& monsters);
+
+// 플레이 관련 변수
+bool StartPlay = FALSE;
+bool click_play = FALSE;
+bool click_exit = FALSE;
+HDC StartBitMapDC = NULL; // 시작 화면 DC
+HBITMAP StartBitMap = NULL; // 시작 화면 비트맵
+RECT StartRect; // 시작화면 사진영역
+HFONT hFont = CreateFont(
+	150,           // Height (150px)
+	0,             // Width (자동 조정)
+	0, 0,          // Escapement, Orientation
+	FW_BOLD,       // Weight
+	FALSE, FALSE, FALSE,    // Italic, Underline, StrikeOut
+	ANSI_CHARSET,
+	OUT_DEFAULT_PRECIS,
+	CLIP_DEFAULT_PRECIS,
+	DEFAULT_QUALITY,
+	DEFAULT_PITCH | FF_DONTCARE,
+	_T("Arial")    // Font name
+);
+
+HFONT hFont2 = CreateFont(
+	100,           // Height (150px)
+	0,             // Width (자동 조정)
+	0, 0,          // Escapement, Orientation
+	FW_BOLD,       // Weight
+	FALSE, FALSE, FALSE,    // Italic, Underline, StrikeOut
+	ANSI_CHARSET,
+	OUT_DEFAULT_PRECIS,
+	CLIP_DEFAULT_PRECIS,
+	DEFAULT_QUALITY,
+	DEFAULT_PITCH | FF_DONTCARE,
+	_T("Arial")    // Font name
+);
+
 
 HINSTANCE g_hlnst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -167,165 +203,200 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		HeartRect.right = HeartRect.left + 49;
 		HeartRect.top = player.Came.top + 10;
 		HeartRect.bottom = HeartRect.top + 15;
-
+		// 시작화면 비트맵 로드
+		TCHAR StartBGfilepath[256];
+		_stprintf_s(StartBGfilepath, _T("Play_graphics/KvsM.bmp"));
+		StartBitMap = (HBITMAP)LoadImage(NULL, StartBGfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		if (StartBitMap == NULL) {
+			MessageBox(hWnd, _T("Failed to load KvsM image"), _T("Error"), MB_OK | MB_ICONERROR);
+			return -1;
+		}
+		StartBitMapDC = CreateCompatibleDC(NULL);
+		StartRect.left = player.Came.left + 300;
+		StartRect.right = StartRect.left + 400;
+		StartRect.top = player.Came.top + 20;
+		StartRect.bottom = StartRect.top + 400;
 
 		ImageCreate();
 		GetClientRect(hWnd, &ViewRect);
 
-		SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
 		break;
 	case WM_PAINT: {
 		hDC = BeginPaint(hWnd, &ps);
 
-		//더블버퍼링
-		hMem2DC = CreateCompatibleDC(hDC); // hMem2DC에다가 다 그림
-		hBitmap = CreateCompatibleBitmap(hDC, 4000, 4000); // 4000x4000 크기의 비트맵 생성
-		hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap); // hMem2DC에 hBitmap을 선택
-	
-		oldBitmap = (HBITMAP)SelectObject(BGBitDC, BackGroundhBitmap); // 배경비트맵 사용
-		BitBlt(hMem2DC, 0, 0, 4000, 4000, BGBitDC, 0, 0, SRCCOPY); // 배경 그리기
-		SelectObject(BGBitDC, oldBitmap); // 이전 비트맵으로 되돌리기
+		if (StartPlay) {
+			//더블버퍼링
+			hMem2DC = CreateCompatibleDC(hDC); // hMem2DC에다가 다 그림
+			hBitmap = CreateCompatibleBitmap(hDC, 4000, 4000); // 4000x4000 크기의 비트맵 생성
+			hOldBitmap = (HBITMAP)SelectObject(hMem2DC, hBitmap); // hMem2DC에 hBitmap을 선택
 
-		// 미니맵 그리기
-		hMiniMapDC = CreateCompatibleDC(hDC);
-		hMiniMapBitmap = CreateCompatibleBitmap(hDC, 200, 200);
-		SelectObject(hMiniMapDC, hMiniMapBitmap);
-		DrawMiniMap(hMem2DC, player, monsters); 
+			oldBitmap = (HBITMAP)SelectObject(BGBitDC, BackGroundhBitmap); // 배경비트맵 사용
+			BitBlt(hMem2DC, 0, 0, 4000, 4000, BGBitDC, 0, 0, SRCCOPY); // 배경 그리기
+			SelectObject(BGBitDC, oldBitmap); // 이전 비트맵으로 되돌리기
 
-		// 플레이어 그리기
-		if (!isPlayerDead) {
-			if (MoveCheck == 0) {
-				player.Draw(hMem2DC);
-			}
-			else if (MoveCheck == 1) {
-				player.UMDraw(hMem2DC, MoveCount);
-			}
-			else if (MoveCheck == 2) {
-				player.DMDraw(hMem2DC, MoveCount);
-			}
-			else if (MoveCheck == 3) {
-				player.LMDraw(hMem2DC, MoveCount);
-			}
-			else if (MoveCheck == 4) {
-				player.RMDraw(hMem2DC, MoveCount);
-			}
-			else if (MoveCheck == 5) {
-				player.LMDraw(hMem2DC, MoveCount);
-			}
-			else if (MoveCheck == 6) {
-				player.RMDraw(hMem2DC, MoveCount);
-			}
-			else if (MoveCheck == 7) {
-				player.LMDraw(hMem2DC, MoveCount);
-			}
-			else if (MoveCheck == 8) {
-				player.RMDraw(hMem2DC, MoveCount);
-			}
-			Rt.Update(player.Tx, player.Ty, DeltaTime);
-			Rt.SetRtTearRect();
-			Rt.Draw(hMem2DC); 
-		}
-		else if (isPlayerDead) {
-			HBITMAP DoldBitmap = (HBITMAP)SelectObject(DieBitDC, DieBitmap);
-			if (MoveCheck == 9) {
-				TransparentBlt(hMem2DC, player.DieRect.left, player.DieRect.top, 29 * 2, 34 * 2, DieBitDC, 0, 0, 29, 34, RGB(255, 200, 200));
-			}
-			else if (MoveCheck == 10) {
-				TransparentBlt(hMem2DC, player.DieRect.left, player.DieRect.top, 80, 28 * 2, DieBitDC, 30, 0, 37, 28, RGB(255, 200, 200));
+			// 미니맵 복사
+			hMiniMapDC = CreateCompatibleDC(hDC);
+			hMiniMapBitmap = CreateCompatibleBitmap(hDC, 200, 200);
+			SelectObject(hMiniMapDC, hMiniMapBitmap);
+			
 
+			// 플레이어 그리기
+			if (!isPlayerDead) {
+				if (MoveCheck == 0) {
+					player.Draw(hMem2DC);
+				}
+				else if (MoveCheck == 1) {
+					player.UMDraw(hMem2DC, MoveCount);
+				}
+				else if (MoveCheck == 2) {
+					player.DMDraw(hMem2DC, MoveCount);
+				}
+				else if (MoveCheck == 3) {
+					player.LMDraw(hMem2DC, MoveCount);
+				}
+				else if (MoveCheck == 4) {
+					player.RMDraw(hMem2DC, MoveCount);
+				}
+				else if (MoveCheck == 5) {
+					player.LMDraw(hMem2DC, MoveCount);
+				}
+				else if (MoveCheck == 6) {
+					player.RMDraw(hMem2DC, MoveCount);
+				}
+				else if (MoveCheck == 7) {
+					player.LMDraw(hMem2DC, MoveCount);
+				}
+				else if (MoveCheck == 8) {
+					player.RMDraw(hMem2DC, MoveCount);
+				}
+				Rt.Update(player.Tx, player.Ty, DeltaTime);
+				Rt.SetRtTearRect();
+				Rt.Draw(hMem2DC);
+			}
+			else if (isPlayerDead) {
+				HBITMAP DoldBitmap = (HBITMAP)SelectObject(DieBitDC, DieBitmap);
+				if (MoveCheck == 9) {
+					TransparentBlt(hMem2DC, player.DieRect.left, player.DieRect.top, 29 * 2, 34 * 2, DieBitDC, 0, 0, 29, 34, RGB(255, 200, 200));
+				}
+				else if (MoveCheck == 10) {
+					TransparentBlt(hMem2DC, player.DieRect.left, player.DieRect.top, 80, 28 * 2, DieBitDC, 30, 0, 37, 28, RGB(255, 200, 200));
+				}
+				SelectObject(DieBitDC, DoldBitmap);
 			}
 
-			SelectObject(DieBitDC, DoldBitmap);
-		}
-
-		// 몬스터와 눈물 그리기
-		for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
-			monster.Draw(hMem2DC);
-		}
-
-		for (auto& tear : tears) {
-			tear.Draw(hMem2DC);
-		}
-		if (BoomCheck) {
-			DrawBoom(hMem2DC, BoomX, BoomY);
-		}
-
-		// 플레이어 체력 UI 그리기
-		HeartRect.left = player.Came.left + 10;
-		HeartRect.right = HeartRect.left + 45;
-		HeartRect.top = player.Came.top + 10;
-		HeartRect.bottom = HeartRect.top + 14;
-
-		HeartOldBitmap = (HBITMAP)SelectObject(HeartBitDC, HeatBitmap);
-		if (player.hp > 50) {
-			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
-		}
-		else if (player.hp > 40 && player.hp <= 50) {
-			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 16, 0, 15, 14, RGB(255, 200, 200));
-		}
-		else if (player.hp > 30 && player.hp <= 40) {
-			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
-		}
-		else if (player.hp > 20 && player.hp <= 30) {
-			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 16, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
-		}
-		else if (player.hp > 10 && player.hp <= 20) {
-			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
-		}
-		else if (player.hp > 0 && player.hp <= 10) {
-			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 16, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
-		}
-		else if (player.hp <= 0) {
-			TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
-			TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
-		}
-		SelectObject(HeartBitDC, HeartOldBitmap);
-
-		if (showLevelUpChoices) {
-			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 80, LC[0], strlen(LC[0]));
-			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 100, LC[1], strlen(LC[1]));
-			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 120, LC[2], strlen(LC[2]));
-		}
-
-		// 플레이어 레벨과 LP 표시
-		sprintf_s(LVbuf, "Lv : %d", player.Level);
-		sprintf_s(LPbuf, "Lp : %d", player.Lp);
-		TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 40, LVbuf, strlen(LVbuf));
-		TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 60, LPbuf, strlen(LPbuf));
-
-		//상점 그리기
-		shop.DrawShop(hMem2DC, player.Came.left, player.Came.bottom - 210);
-		if (clicked) {
-			if (draw) {
-				IMGparabite[3].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
-				draw = !draw;
+			// 몬스터와 눈물 그리기
+			for (auto& monster : monsters) { // monster를 참조자로  monsters vector 전체 순회하며 루프
+				monster.Draw(hMem2DC);
 			}
-			else {
-				draw = !draw;
+
+			for (auto& tear : tears) {
+				tear.Draw(hMem2DC);
 			}
+			if (BoomCheck) {
+				DrawBoom(hMem2DC, BoomX, BoomY);
+			}
+
+			// 플레이어 체력 UI 그리기
+			HeartRect.left = player.Came.left + 10;
+			HeartRect.right = HeartRect.left + 45;
+			HeartRect.top = player.Came.top + 10;
+			HeartRect.bottom = HeartRect.top + 14;
+
+			HeartOldBitmap = (HBITMAP)SelectObject(HeartBitDC, HeatBitmap);
+			if (player.hp > 50) {
+				TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
+			}
+			else if (player.hp > 40 && player.hp <= 50) {
+				TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 16, 0, 15, 14, RGB(255, 200, 200));
+			}
+			else if (player.hp > 30 && player.hp <= 40) {
+				TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
+			}
+			else if (player.hp > 20 && player.hp <= 30) {
+				TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 16, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
+			}
+			else if (player.hp > 10 && player.hp <= 20) {
+				TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 0, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
+			}
+			else if (player.hp > 0 && player.hp <= 10) {
+				TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 16, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
+			}
+			else if (player.hp <= 0) {
+				TransparentBlt(hMem2DC, HeartRect.left, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 15, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
+				TransparentBlt(hMem2DC, HeartRect.left + 30, HeartRect.top, 15, 14, HeartBitDC, 32, 0, 15, 14, RGB(255, 200, 200));
+			}
+			SelectObject(HeartBitDC, HeartOldBitmap);
+
+			if (showLevelUpChoices) {
+				TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 80, LC[0], strlen(LC[0]));
+				TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 100, LC[1], strlen(LC[1]));
+				TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 120, LC[2], strlen(LC[2]));
+			}
+
+			// 플레이어 레벨과 LP 표시
+			sprintf_s(LVbuf, "Lv : %d", player.Level);
+			sprintf_s(LPbuf, "Lp : %d", player.Lp);
+			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 40, LVbuf, strlen(LVbuf));
+			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 60, LPbuf, strlen(LPbuf));
+
+			DrawMiniMap(hMem2DC, player, monsters); // 미니맵 그리기
+
+			//상점 그리기
+			shop.DrawShop(hMem2DC, player.Came.left, player.Came.bottom - 210);
+			if (clicked) {
+				if (draw) {
+					IMGparabite[3].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
+					draw = !draw;
+				}
+				else {
+					draw = !draw;
+				}
+			}
+
+			BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
+
+			SelectObject(hMem2DC, hOldBitmap);
+			DeleteObject(hBitmap);
+			DeleteObject(hOldBitmap);
+			DeleteObject(hMiniMapBitmap);
+			DeleteDC(hMem2DC);
+			DeleteDC(hMiniMapDC);
+		}
+		else {
+			SelectObject(StartBitMapDC, StartBitMap);
+			StretchBlt(hDC, StartRect.left, StartRect.top, StartRect.right - StartRect.left, StartRect.bottom - StartRect.top, StartBitMapDC, 0, 0, 400, 400, SRCCOPY); // 시작 화면 그리기
+			HFONT hOldFont1 = (HFONT)SelectObject(hDC, hFont);
+			SetTextColor(hDC, RGB(0, 0, 0)); // 흰 글자
+			SetBkMode(hDC, TRANSPARENT);           // 배경 투명
+
+			// 텍스트 출력
+			TextOut(hDC, StartRect.left - 250, StartRect.bottom, _T("Key Vs Mouse"), _tcslen(_T("Key Vs Mouse")));
+			
+			HFONT hOldFont2 = (HFONT)SelectObject(hDC, hFont2);
+			Rectangle(hDC, StartRect.left, StartRect.bottom + 200, StartRect.right, StartRect.bottom + 300);
+			TextOut(hDC, StartRect.left + 35, StartRect.bottom + 200, _T("게임 시작"), _tcslen(_T("게임 시작")));
+
+			Rectangle(hDC, StartRect.left, StartRect.bottom + 350, StartRect.right, StartRect.bottom + 450);
+			TextOut(hDC, StartRect.left + 35, StartRect.bottom + 350, _T("게임 종료"), _tcslen(_T("게임 종료")));
+
+			SelectObject(hDC, hOldFont1); // 폰트 원복
+			SelectObject(hDC, hOldFont2); // 폰트 원복
 		}
 
-		BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
-
-		SelectObject(hMem2DC, hOldBitmap);
-		DeleteObject(hBitmap);
-		DeleteObject(hOldBitmap);
-		DeleteObject(hMiniMapBitmap); 
-		DeleteDC(hMem2DC);
-		DeleteDC(hMiniMapDC);         
+		
 
 		EndPaint(hWnd, &ps);
 		break;
@@ -572,30 +643,43 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		worldX = cursor.x + player.Came.left;
 		worldY = cursor.y + player.Came.top;
 
-		POINT Wcursor = { worldX, worldY };
+		if (StartPlay) {
+			POINT Wcursor = { worldX, worldY };
 
-		RECT rect;
-		rect.left = player.Came.left + 100;
-		rect.top = player.Came.top + 800;
-		rect.right = player.Came.left + 300;
-		rect.bottom = player.Came.bottom;
+			RECT rect;
+			rect.left = player.Came.left + 100;
+			rect.top = player.Came.top + 800;
+			rect.right = player.Came.left + 300;
+			rect.bottom = player.Came.bottom;
 
-		if (PtInRect(&rect, Wcursor)) {
-			clicked = true;
-			Mtype = 2;
+			if (PtInRect(&rect, Wcursor)) {
+				clicked = true;
+				Mtype = 2;
+			}
 		}
-
+		else {
+			if (worldX >= StartRect.left && worldX <= StartRect.right && worldY >= StartRect.bottom + 200 && worldY <= StartRect.bottom + 300) {
+				StartPlay = true; // 게임 시작
+				SetTimer(hWnd, 1, 16, NULL); // 60프레임 타이머 생성
+			}
+			else if (worldX >= StartRect.left && worldX <= StartRect.right && worldY >= StartRect.bottom + 350 && worldY <= StartRect.bottom + 450) {
+				exit(1); // 게임 종료
+			}
+		}
+	
 		break;
 	}
 	case WM_LBUTTONUP: {
 		worldX = cursor.x + player.Came.left;
 		worldY = cursor.y + player.Came.top;
-		if (clicked) {
-			monsters.emplace_back();
-			monsters.back().SetSpot(worldX, worldY);
-			monsters.back().SetRect();
-			monsters.back().SetMonster(Mtype);
-			clicked = false;
+		if (StartPlay) {
+			if (clicked) {
+				monsters.emplace_back();
+				monsters.back().SetSpot(worldX, worldY);
+				monsters.back().SetRect();
+				monsters.back().SetMonster(Mtype);
+				clicked = false;
+			}
 		}
 	}
 	case WM_MOUSEMOVE:
