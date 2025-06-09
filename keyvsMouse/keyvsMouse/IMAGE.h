@@ -7,4 +7,5 @@ extern CImage IMGisaac[17];
 extern CImage IMGmom[23];
 extern CImage IMGdeath[12];
 extern CImage IMGshop;
+extern CImage IMGboomfly[3];
 void ImageCreate();

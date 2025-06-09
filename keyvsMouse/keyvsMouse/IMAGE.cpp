@@ -6,6 +6,7 @@ CImage IMGisaac[17];
 CImage IMGmom[23];
 CImage IMGdeath[12];
 CImage IMGshop;
+CImage IMGboomfly[3];
 
 void ImageCreate() {
 	for (int i = 0; i < 14; i++) {
@@ -36,5 +37,10 @@ void ImageCreate() {
 	TCHAR filePath[50];
 	_stprintf_s(filePath, TEXT("Play_graphics/shop.png"));
 	IMGshop.Load(filePath);
+	for (int i = 0; i < 3; i++) {
+		TCHAR filePath[50];
+		_stprintf_s(filePath, TEXT("Monster_graphics/monster_03_boomfly_0%d.png"), i);
+		IMGboomfly[i].Load(filePath);
+	}
 }
 
