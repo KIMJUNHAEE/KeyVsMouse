@@ -350,9 +350,6 @@ void MONSTER::Draw(HDC hDC) // 그리기 함수
 							InTimer = 0.0f;
 						}
 					}
-					if (Animation != 1) {
-						IMGmom[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
-					}
 				}
 			}
 		}
