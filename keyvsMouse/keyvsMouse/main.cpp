@@ -145,13 +145,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static float DeltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
 
 	static float ElapsedTime = 0.0f;  // 누적 경과 시간 (초)
-	static float TimeLimit = 10.0f; // 5분 = 300초
+	static float TimeLimit = 300.0f; // 5분 = 300초
 	static int timeInSeconds;
 	static int minutes;
 	static int seconds;
+	static float DeadTime = 0.0f;
 	static char Timebuf[6];
 	static bool TimeOver = FALSE; 
-
+	static bool isDeadTimerStarted = FALSE;
 	static std::vector<MONSTER> monsters; // 몬스터 벡터 선언
 	static std::vector<TEARS> tears; // 눈물 백터 선언
 
@@ -446,6 +447,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		if (isPlayerDead) {
 			SelectObject(MWinBitMapDC, MWinBitMap);
 			StretchBlt(hDC, StartRect.left, StartRect.top, StartRect.right - StartRect.left, StartRect.bottom - StartRect.top, MWinBitMapDC, 0, 0, 400, 400, SRCCOPY);
+			
 		}
 		
 
@@ -457,13 +459,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 	case WM_TIMER: {
 
-		ElapsedTime += DeltaTime; // 경과 시간 업데이트
+		if (!isPlayerDead) {
+			ElapsedTime += DeltaTime; // 경과 시간 업데이트
+		}
+		else {
+			if (!isDeadTimerStarted) {
+				DeadTime = ElapsedTime;
+				isDeadTimerStarted = TRUE;
+			}
+			DeadTime += DeltaTime; // 사망 후 경과 시간 업데이트
+			// 2초가 지나면 타이머 종료
+			if (DeadTime - ElapsedTime >= 2.0f) {
+				KillTimer(hWnd, 1);
+			}
+		}
 		timeInSeconds = static_cast<int>(ElapsedTime); // 초 단위로 변환
 		minutes = timeInSeconds / 60; // 분 단위
 		seconds = timeInSeconds % 60; // 초 단위
 
 		if(ElapsedTime >= TimeLimit) { 
-			TimeOver = TRUE;
+			if (!isPlayerDead) {
+				TimeOver = TRUE;
+			}
 		}
 
 		player.SetHeadRect();
@@ -613,8 +630,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		if (player.hp <= 0) {
 			MoveCheck = player.SetDieRect(DeltaTime);
 			isPlayerDead = TRUE;
-			//MessageBox(hWnd, _T("Game Over!"), _T("Game Over"), MB_OK | MB_ICONERROR);
-			//PostQuitMessage(0); // 게임 종료
 		}
 
 		// 레벨업 후 선택지
