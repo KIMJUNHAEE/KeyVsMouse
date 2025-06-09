@@ -104,7 +104,14 @@ void MONSTER::SetMonster(int ntype)
 	case 3:
 		type = 3;
 		Xsize = 64; Ysize = 128;
-		hp = 1000, power = 50, Mspeed = 0, Aspeed = 1.0f, range = 0;
+		hp = 1000, power = 20, Mspeed = 0, Aspeed = 1.0f, range = 0;
+		DropItem = 1;
+		Animation = 1;
+		break;
+	case 4:
+		type = 4;
+		Xsize = 32; Ysize = 32;
+		hp = 300, power = 20, Mspeed = 100, Aspeed = 1.0f, range = 0;
 		DropItem = 1;
 		Animation = 1;
 		break;
@@ -349,6 +356,16 @@ void MONSTER::Draw(HDC hDC) // 그리기 함수
 							Animation++;
 							InTimer = 0.0f;
 						}
+					}
+				}
+			}
+			else if (type == 4) {
+				if (hp > 0) {
+					if (Animation == 1) {
+						IMGboomfly[Animation++].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
+					}
+					else if (Animation == 2){
+						IMGboomfly[Animation--].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 					}
 				}
 			}

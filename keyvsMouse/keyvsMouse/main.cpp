@@ -148,6 +148,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static SHOP shop;
 	static bool clicked;
 	static bool draw = true;
+	static int ShopNum = 0;
 
 	static char LVbuf[100];
 	static char LPbuf[100];
@@ -358,7 +359,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			shop.DrawShop(hMem2DC, player.Came.left, player.Came.bottom - 210);
 			if (clicked) {
 				if (draw) {
-					IMGparabite[3].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
+					if (Mtype == 2) {
+						IMGparabite[3].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
+					}
+					else if (Mtype == 4) {
+						IMGboomfly[1].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
+					}
 					draw = !draw;
 				}
 				else {
@@ -655,6 +661,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			if (PtInRect(&rect, Wcursor)) {
 				clicked = true;
 				Mtype = 2;
+			}
+
+			rect.left += 200;
+			rect.right += 200;
+
+			if (PtInRect(&rect, Wcursor)) {
+				clicked = true;
+				Mtype = 4;
 			}
 		}
 		else {
