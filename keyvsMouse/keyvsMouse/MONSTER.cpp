@@ -116,6 +116,12 @@ void MONSTER::SetMonster(int ntype)
 		DropItem = 1;
 		Animation = 1;
 		break;
+	case 5:
+		type = 5;
+		Xsize = 19, Ysize = 15;
+		hp = 200, power = 10, Mspeed = 50, Aspeed = 1.0f, range = 0;
+		DropItem = 1;
+		Animation = 1;
 	default:
 		break;
 	}
@@ -126,7 +132,7 @@ int MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime) 
 	if (hp > 0) {
 		RECT lprcDest;
 		if (IntersectRect(&lprcDest, &rect, &head) || IntersectRect(&lprcDest, &rect, &body)) {
-			if (type == 1) { // 파리
+			if (type == 1 || type == 5) { // 파리
 				Death();
 				return power;
 			}
@@ -219,7 +225,7 @@ void MONSTER::Hit(int power) // 피격 함수
 void MONSTER::Death() // 사망 함수
 {
 	hp = 0;
-	if (type == 1) {
+	if (type == 1 || type == 5) {
 		Animation = 3;
 		x = x + (Xsize / 2);
 		y = y + (Ysize / 2);
@@ -245,7 +251,7 @@ bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
 		return true;
 	}
 
-	if (type == 1) { // 파리
+	if (type == 1 || type == 5) { // 파리
 		if ((Animation == 1 || Animation == 2) && hp <= 0) {
 			Death();
 		}
@@ -293,7 +299,7 @@ void MONSTER::Draw(HDC hDC) // 그리기 함수
 	if (Animation == 0) {
 		return;
 	}
-	if (type == 1) {
+	if (type == 1 || type == 5) {
 		if (hp > 0) {
 			// Rectangle(hDC, rect.left, rect.top, rect.right, rect.bottom); 디버깅
 			if (Animation == 1) {

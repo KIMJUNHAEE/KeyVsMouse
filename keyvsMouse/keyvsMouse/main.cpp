@@ -175,6 +175,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 	static char LVbuf[100];
 	static char LPbuf[100];
+	static char Coinbuf[100];
+
+	bool boomflyDeath = false;
+	int boomflyX;
+	int boomflyY;
 
 	switch (iMessage) {
 	case WM_CREATE:
@@ -403,8 +408,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			// 플레이어 레벨과 LP 표시
 			sprintf_s(LVbuf, "Lv : %d", player.Level);
 			sprintf_s(LPbuf, "Lp : %d", player.Lp);
+			sprintf_s(Coinbuf, "COIN : %d", shop.coin);
 			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 40, LVbuf, strlen(LVbuf));
 			TextOutA(hMem2DC, player.Came.left + 10, player.Came.top + 60, LPbuf, strlen(LPbuf));
+			TextOutA(hMem2DC, player.Came.left + 10, player.Came.bottom - 250, Coinbuf, strlen(Coinbuf));
 
 			sprintf_s(Timebuf, "%02d:%02d", minutes, seconds);
 			TextOutA(hMem2DC, player.Came.right - 60, player.Came.top + 40, Timebuf, strlen(Timebuf)); // 시간 표시
@@ -600,12 +607,39 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						player.Lp = 0;
 					}
 				}
+
+				if (monster->type == 4) {
+					boomflyDeath = true;
+					boomflyX = monster->x;
+					boomflyY = monster->y;
+				}
+
 				monster = monsters.erase(monster);
+
 			}
 			else {
 				player.hp -= monster->MoveToPlayer(point, player.HeadRect, player.BodyRect, DeltaTime);
 				monster++;
 			}
+		}
+
+		if (boomflyDeath) {
+			monsters.emplace_back();
+			monsters.back().SetSpot(boomflyX + 5, boomflyY + 5);
+			monsters.back().SetRect();
+			monsters.back().SetMonster(5);
+			monsters.emplace_back();
+			monsters.back().SetSpot(boomflyX - 5, boomflyY - 5);
+			monsters.back().SetRect();
+			monsters.back().SetMonster(5);
+			monsters.emplace_back();
+			monsters.back().SetSpot(boomflyX + 5, boomflyY - 5);
+			monsters.back().SetRect();
+			monsters.back().SetMonster(5);
+			monsters.emplace_back();
+			monsters.back().SetSpot(boomflyX - 5, boomflyY + 5);
+			monsters.back().SetRect();
+			monsters.back().SetMonster(5);
 		}
 
 		if (!isPlayerDead) {
@@ -746,6 +780,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			RTC = 0;
 			TripleShot = TRUE;
 		}
+
+		shop.Update(DeltaTime);
 
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;

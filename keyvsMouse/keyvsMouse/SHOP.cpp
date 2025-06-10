@@ -27,3 +27,13 @@ void SHOP::DrawShop(HDC hDC, int x, int y)
 	IMGboomfly[1].Draw(hDC, x +310, y+10, 180, 180, 0, 0, 32, 32);
 	IMGmom[22].Draw(hDC, x + 510, y + 10, 180, 180, 0, 0, 128, 174);
 }
+
+void SHOP::Update(float DeltaTime)
+{
+	InTimer += DeltaTime;
+
+	if (InTimer >= 1.0f) {
+		coin += 1;
+		InTimer = 0.0f;
+	}
+}
