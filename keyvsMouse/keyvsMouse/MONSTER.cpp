@@ -103,10 +103,11 @@ void MONSTER::SetMonster(int ntype)
 		break;
 	case 3:
 		type = 3;
-		Xsize = 64; Ysize = 128;
+		Xsize = 120; Ysize = 49;
 		hp = 1000, power = 20, Mspeed = 0, Aspeed = 1.0f, range = 0;
 		DropItem = 1;
 		Animation = 1;
+		InTimer = -1.0f;
 		break;
 	case 4:
 		type = 4;
@@ -145,10 +146,16 @@ int MONSTER::MoveToPlayer(POINT player1, RECT head, RECT body, float DeltaTime) 
 			Intersect = false;
 		}
 
-		if (type == 3 && Animation == 1) {
-			x = (head.left + head.right) / 2 - 64;
-			y = head.top - (Ysize * 2);
-			return 0;
+		if (type == 3) {
+			if (Animation == 1) {
+				x = (head.left + head.right) / 2 - 60;
+				y = body.bottom - 20;
+				return 0;
+			}
+			else if (Animation == 2) {
+				x = ((head.left + head.right) / 2) - 64;
+				y = head.top - 96;
+			}
 		}
 
 		float dx, dy;
@@ -249,10 +256,12 @@ bool MONSTER::Update(float DeltaTime) // 내부타이머 함수
 		}
 		if (type == 3) { // 엄마
 			if (Animation == 1) {
-				Ysize = 64;
+				Xsize = 120;
+				Ysize = 49;
 			}
 			if (InTimer >= 2.0f) {
 				if (Animation == 2) {
+					Xsize = 128;
 					Ysize = 16;
 				}
 				else if (Animation > 2 && Animation < 22) {
@@ -345,18 +354,19 @@ void MONSTER::Draw(HDC hDC) // 그리기 함수
 				if (hp > 0) {
 					if (InTimer >= 2.0f) {
 						if (Animation == 1) {
-							InTimer = 0.0f;
+							InTimer = -1.0f;
 						}
 						if (Animation > 1 && Animation <= 22) {
 							Animation--;
 						}
 					}
-					else {
+					else if (InTimer >= 0.0f && InTimer < 2.0f) {
 						if (Animation >= 1 && Animation < 22) {
 							Animation++;
 							InTimer = 0.0f;
 						}
 					}
+					IMGmom[Animation].Draw(hDC, x, y, Xsize, Ysize, 0, 0, Xsize, Ysize);
 				}
 			}
 			else if (type == 4) {

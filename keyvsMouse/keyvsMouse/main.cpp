@@ -420,6 +420,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					else if (Mtype == 4) {
 						IMGboomfly[1].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
 					}
+					else if (Mtype == 3) {
+						IMGmom[22].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 128, 174);
+					}
 					draw = !draw;
 				}
 				else {
@@ -801,6 +804,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			if (PtInRect(&rect, Wcursor)) {
 				clicked = true;
 				Mtype = 4;
+			}
+
+			rect.left += 200;
+			rect.right += 200;
+
+			if (PtInRect(&rect, Wcursor)) {
+				clicked = true;
+				Mtype = 3;
 			}
 		}
 		else {
