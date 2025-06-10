@@ -119,7 +119,7 @@ void MONSTER::SetMonster(int ntype)
 	case 5:
 		type = 5;
 		Xsize = 19, Ysize = 15;
-		hp = 200, power = 10, Mspeed = 50, Aspeed = 1.0f, range = 0;
+		hp = 200, power = 10, Mspeed = 190, Aspeed = 1.0f, range = 0;
 		DropItem = 1;
 		Animation = 1;
 	default:
