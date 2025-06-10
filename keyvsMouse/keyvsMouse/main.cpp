@@ -10,6 +10,7 @@
 #include "TEARS.h"
 #include "RoundTear.h"
 #include "SHOP.h"
+#include <random>
 
 #define WINDOW_WIDTH 4000
 #define WINDOW_HEIGHT 4000
@@ -133,6 +134,10 @@ int WINAPI WinMain(HINSTANCE hlnstance, HINSTANCE hPrevlnstance, LPSTR lpszCmdPa
 	return Message.wParam;
 }
 
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_int_distribution<int> dist(0, 4000);
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -180,6 +185,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	bool boomflyDeath = false;
 	int boomflyX;
 	int boomflyY;
+
+	static float InTimer;
 
 	switch (iMessage) {
 	case WM_CREATE:
@@ -489,6 +496,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_TIMER: {
+
+		InTimer += DeltaTime;
+
+		if (InTimer >= 1.0f) {
+			InTimer = 0.0f;
+			monsters.emplace_back();
+			monsters.back().SetSpot(dist(gen), dist(gen));
+			monsters.back().SetRect();
+			monsters.back().SetMonster(1);
+		}
 
 		if (!isPlayerDead) {
 			ElapsedTime += DeltaTime; // 경과 시간 업데이트
@@ -892,24 +909,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			rect.bottom = player.Came.bottom;
 
 			if (PtInRect(&rect, Wcursor)) {
-				clicked = true;
-				Mtype = 2;
+				if (shop.coin >= 1) {
+					clicked = true;
+					Mtype = 2;
+					shop.coin -= 1;
+				}
 			}
 
 			rect.left += 200;
 			rect.right += 200;
 
 			if (PtInRect(&rect, Wcursor)) {
-				clicked = true;
-				Mtype = 4;
+				if (shop.coin >= 2) {
+					clicked = true;
+					Mtype = 4;
+					shop.coin -= 2;
+				}
 			}
 
 			rect.left += 200;
 			rect.right += 200;
 
 			if (PtInRect(&rect, Wcursor)) {
-				clicked = true;
-				Mtype = 3;
+				if (shop.coin >= 10) {
+					clicked = true;
+					Mtype = 3;
+					shop.coin -= 10;
+				}
 			}
 		}
 		else {
