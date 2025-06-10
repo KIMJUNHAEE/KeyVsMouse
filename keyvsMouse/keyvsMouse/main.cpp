@@ -934,10 +934,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			rect.right += 200;
 
 			if (PtInRect(&rect, Wcursor)) {
-				if (shop.coin >= 10) {
+				if (shop.coin >= 60) {
 					clicked = true;
 					Mtype = 3;
-					shop.coin -= 10;
+					shop.coin -= 60;
 				}
 			}
 		}
