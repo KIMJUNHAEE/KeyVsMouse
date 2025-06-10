@@ -468,7 +468,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		if (isPlayerDead) {
 			SelectObject(MWinBitMapDC, MWinBitMap);
 			StretchBlt(hDC, StartRect.left, StartRect.top, StartRect.right - StartRect.left, StartRect.bottom - StartRect.top, MWinBitMapDC, 0, 0, 400, 400, SRCCOPY);
-
 		}
 
 
@@ -664,6 +663,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				MoveCount++;
 				if (MoveCount >= 9) MoveCount = 0;
 			}
+
+			SHORT t = GetAsyncKeyState('T');
+			bool T = t & 0x8000;
+
+			if (T) {
+				TripleShot = TRUE;
+			}
 		}
 
 		// 플레이어 주금
@@ -700,13 +706,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			player.LevelUp = false;
 		}
 
-		if (player.Level >= 2) { // 트리플샷 
+		if (player.Level >= 15) { // 트리플샷 
 			CreateRTLR = TRUE;
 			RTC = 1;
 		}
 		if (CreateRTLR && RTC == 1) {
 			RTC = 0;
-			
 			TripleShot = TRUE;
 		}
 
