@@ -41,6 +41,7 @@ bool isPlayerDead = false;
 
 bool showLevelUpChoices = false;
 int LevelUpChoices[3]; // 선택지 배열
+int MaxLevel = 30;
 char LC[3][100]; // 선택지 텍스트
 
 bool TripleShot = FALSE;
@@ -580,7 +581,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		for (auto monster = monsters.begin(); monster != monsters.end();) {
 			if (monster->Update(DeltaTime)) {
 				if (monster->killedByTear) {
-					player.AddLp(10); // 눈물로 죽인 경우만 LP 추가
+					if (player.Level < MaxLevel) {
+						if (monster->type == 1) {
+							player.AddLp(5); // 눈물로 죽인 경우만 LP 추가
+						}
+						else if (monster->type == 2) {
+							player.AddLp(10);
+						}
+						else if (monster->type == 3) {
+							player.AddLp(100);
+						}
+						else if (monster->type == 4) {
+							player.AddLp(15);
+						}
+					}
+					else if (player.Level >= MaxLevel) {
+						player.Level = 0;
+						player.Lp = 0;
+					}
 				}
 				monster = monsters.erase(monster);
 			}
@@ -726,10 +744,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			switch (wParam) {
 			case '1':
 				if (LevelUpChoices[0] == 1) { // 1 = 이속증가
-					player.Mspeed += 2;
+					player.Mspeed += 1;
 				}
 				else if (LevelUpChoices[0] == 2) { // 2 = 공격력 증가
-					player.Damage += 5;
+					player.Damage += 40;
 				}
 				else if (LevelUpChoices[0] == 3) { // 3 = 공속 증가
 					if (player.Aspeed > 0.2f) {
@@ -743,10 +761,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				break;
 			case '2':
 				if (LevelUpChoices[1] == 1) { // 1 = 이속증가
-					player.Mspeed += 2;
+					player.Mspeed += 1;
 				}
 				else if (LevelUpChoices[1] == 2) { // 2 = 공격력 증가
-					player.Damage += 5;
+					player.Damage += 40;
 				}
 				else if (LevelUpChoices[1] == 3) { // 3 = 공속 증가
 					if (player.Aspeed > 0.2f) {
@@ -760,10 +778,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				break;
 			case '3':
 				if (LevelUpChoices[2] == 1) { // 1 = 이속증가
-					player.Mspeed += 2;
+					player.Mspeed += 1;
 				}
 				else if (LevelUpChoices[2] == 2) { // 2 = 공격력 증가
-					player.Damage += 5;
+					player.Damage += 40;
 				}
 				else if (LevelUpChoices[2] == 3) { // 3 = 공속 증가
 					if (player.Aspeed > 0.2f) {

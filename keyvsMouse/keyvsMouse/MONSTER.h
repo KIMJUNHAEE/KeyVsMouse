@@ -8,8 +8,6 @@
 class MONSTER
 {
 private:
-	
-	int type; // 몬스터 시드값
 	int Xsize; // 몬스터 x 크기
 	int Ysize; // 몬스터 y 크기
 	int power; // 공격력
@@ -23,6 +21,7 @@ private:
 	bool Intersect; // 교차 여부
 
 public:
+	int type; // 몬스터 시드값
 	float x, y; // 몬스터 좌상단 좌표
 	RECT rect; // 그리기용 좌표
 	int hp; // 체력

@@ -97,7 +97,7 @@ void MONSTER::SetMonster(int ntype)
 	case 2:
 		type = 2;
 		Xsize = 32, Ysize = 32;
-		hp = 400, power = 20, Mspeed = 30, Aspeed = 1.0f, range = 0;
+		hp = 400, power = 20, Mspeed = 130, Aspeed = 1.0f, range = 0;
 		DropItem = 1;
 		Animation = 1;
 		break;
@@ -112,7 +112,7 @@ void MONSTER::SetMonster(int ntype)
 	case 4:
 		type = 4;
 		Xsize = 32; Ysize = 32;
-		hp = 300, power = 20, Mspeed = 100, Aspeed = 1.0f, range = 0;
+		hp = 300, power = 15, Mspeed = 250, Aspeed = 1.0f, range = 0;
 		DropItem = 1;
 		Animation = 1;
 		break;

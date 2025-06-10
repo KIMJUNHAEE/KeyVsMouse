@@ -25,7 +25,7 @@ public:
 	int Tx, Ty; // 플레이어 타겟 좌표
 	int Damage; // 플레이어 공격력
 	float Aspeed; // 공격속도
-	int Lp = 0; // 플레이어 레벨
+	int Lp = 0; // 플레이어 레벨포인트
 	int Level = 1; // 플레이어 레벨
 	int Mspeed; // 이동속도
 	RECT HeadRect; // 플레이어 머리 그리기용 좌표 
