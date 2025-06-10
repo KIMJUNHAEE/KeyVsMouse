@@ -738,7 +738,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			showLevelUpChoices = true;
 
 			for (int i = 0; i < 3; i++) {
-				LevelUpChoices[i] = rand() % 4 + 1;
+				LevelUpChoices[i] = rand() % 5 + 1;
 
 				if (LevelUpChoices[i] == 1) {
 					if (player.Mspeed == 12) {
@@ -768,6 +768,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				else if (LevelUpChoices[i] == 4) {
 					strcpy_s(LC[i], "사거리 증가");
 				}
+				else if (LevelUpChoices[i] == 5) {
+					strcpy_s(LC[i], "체력 회복");
+				}
+
 			}
 			player.LevelUp = false;
 		}
@@ -808,6 +812,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				else if (LevelUpChoices[0] == 4) { // 4 = 사거리 증가
 					MaxRange += 50.0f;
 				}
+				else if (LevelUpChoices[0] == 5) {
+					player.hp += 30;
+					if (player.hp > 60) player.hp = 60;
+				}
 				showLevelUpChoices = false;
 				break;
 			case '2':
@@ -829,6 +837,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				else if (LevelUpChoices[1] == 4) { // 4 = 사거리 증가
 					MaxRange += 50.0f;
 				}
+				else if (LevelUpChoices[1] == 5) {
+					player.hp += 30;
+					if (player.hp > 60) player.hp = 60;
+				}
 				showLevelUpChoices = false;
 				break;
 			case '3':
@@ -849,6 +861,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				}
 				else if (LevelUpChoices[2] == 4) { // 4 = 사거리 증가
 					MaxRange += 50.0f;
+				}
+				else if (LevelUpChoices[2] == 5) {
+					player.hp += 30;
+					if (player.hp > 60) player.hp = 60;
 				}
 				showLevelUpChoices = false;
 				break;
