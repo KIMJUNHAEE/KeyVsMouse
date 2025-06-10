@@ -707,14 +707,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				LevelUpChoices[i] = rand() % 4 + 1;
 
 				if (LevelUpChoices[i] == 1) {
-					strcpy_s(LC[i], "이동속도 증가");
+					if (player.Mspeed == 12) {
+						strcpy_s(LC[i], "최대 이동속도 입니다");
+					}
+					else {
+						strcpy_s(LC[i], "이동속도 증가");
+					}
+					
 				}
 				else if (LevelUpChoices[i] == 2) {
-					strcpy_s(LC[i], "공격력 증가");
+					if (player.Damage == 500) {
+						strcpy_s(LC[i], "최대 공격력 입니다");
+					}
+					else {
+						strcpy_s(LC[i], "공격력 증가");
+					}
 				}
 				else if (LevelUpChoices[i] == 3) {
-					if (player.Aspeed == 0.1f) {
-						strcpy_s(LC[i], "이미 최대 공격속도 입니다");
+					if (player.Aspeed == 0.3f) {
+						strcpy_s(LC[i], "최대 공격속도 입니다");
 					}
 					else {
 						strcpy_s(LC[i], "공격속도 증가");
@@ -744,13 +755,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			switch (wParam) {
 			case '1':
 				if (LevelUpChoices[0] == 1) { // 1 = 이속증가
-					player.Mspeed += 1;
+					if (player.Mspeed < 12) {
+						player.Mspeed += 1;
+					}
 				}
 				else if (LevelUpChoices[0] == 2) { // 2 = 공격력 증가
-					player.Damage += 40;
+					if (player.Damage < 500) {
+						player.Damage += 25;
+					}
 				}
 				else if (LevelUpChoices[0] == 3) { // 3 = 공속 증가
-					if (player.Aspeed > 0.2f) {
+					if (player.Aspeed > 0.3f) {
 						player.Aspeed -= 0.1f;
 					}
 				}
@@ -761,13 +776,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				break;
 			case '2':
 				if (LevelUpChoices[1] == 1) { // 1 = 이속증가
-					player.Mspeed += 1;
+					if (player.Mspeed < 12) {
+						player.Mspeed += 1;
+					}
 				}
 				else if (LevelUpChoices[1] == 2) { // 2 = 공격력 증가
-					player.Damage += 40;
+					if (player.Damage < 500) {
+						player.Damage += 25;
+					}
 				}
 				else if (LevelUpChoices[1] == 3) { // 3 = 공속 증가
-					if (player.Aspeed > 0.2f) {
+					if (player.Aspeed > 0.3f) {
 						player.Aspeed -= 0.1f;
 					}
 				}
@@ -778,13 +797,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				break;
 			case '3':
 				if (LevelUpChoices[2] == 1) { // 1 = 이속증가
-					player.Mspeed += 1;
+					if (player.Mspeed < 12) {
+						player.Mspeed += 1;
+					}
 				}
 				else if (LevelUpChoices[2] == 2) { // 2 = 공격력 증가
-					player.Damage += 40;
+					if (player.Damage < 500) {
+						player.Damage += 25;
+					}
 				}
 				else if (LevelUpChoices[2] == 3) { // 3 = 공속 증가
-					if (player.Aspeed > 0.2f) {
+					if (player.Aspeed > 0.3f) {
 						player.Aspeed -= 0.1f;
 					}
 				}
