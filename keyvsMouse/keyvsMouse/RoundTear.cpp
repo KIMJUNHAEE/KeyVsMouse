@@ -10,8 +10,8 @@ static HDC RTBitDC;
 
 RoundTear::RoundTear(int Px, int Py) {
 	rad = 60;
-	int x = Px + rad;
-	int y = Py + rad;
+	x = Px + rad;
+	y = Py + rad;
 	angle = 0.0f;
 	speed = 8;
 
@@ -52,4 +52,5 @@ void RoundTear::Draw(HDC nhDC) { // 눈물 그리기 함수
 	TransparentBlt(nhDC, RtRect.left, RtRect.top, (RtRect.right - RtRect.left), (RtRect.bottom - RtRect.top), RTBitDC, 18, 0, 8, 8, RGB(255, 200, 200));
 	SelectObject(RTBitDC, RToldBitmap);
 }; 
+
 

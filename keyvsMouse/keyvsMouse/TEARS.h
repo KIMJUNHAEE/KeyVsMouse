@@ -21,7 +21,7 @@ public:
 	float maxDistance = 500.0f;    // 일정 거리 도달 시 제거
 	bool isActive = true;   // 살아있는 눈물 여부
 
-	TEARS(int Px, int Py); // 생성자
+	TEARS(int Px, int Py, float n); // 생성자
 	~TEARS(); // 소멸자
 
 	static void LoadTearsBitMap(); // 눈물 비트맵 로드 함수
@@ -30,6 +30,7 @@ public:
 	void Update(float DeltaTime); // 눈물 업데이트 함수
 	void Draw(HDC nhDC); // 눈물 그리기 함수
 	bool IsOutOfRange();    // 거리 체크 함수
+	void SetRange(float nrange);
 
 };
 

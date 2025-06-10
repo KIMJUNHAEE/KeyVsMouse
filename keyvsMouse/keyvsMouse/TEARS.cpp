@@ -21,7 +21,7 @@ void TEARS::LoadTearsBitMap() {
 }
 
 
-TEARS::TEARS(int Px, int Py) { // 생성자
+TEARS::TEARS(int Px, int Py, float n) { // 생성자
 	x = Px; // 눈물의 시작 x좌표
 	y = Py; // 눈물의 시작 y좌표	
 	size = 10;
@@ -32,7 +32,7 @@ TEARS::TEARS(int Px, int Py) { // 생성자
 	TearRect.right = x + (width/2) + size;
 	TearRect.bottom = y + (height/2) + size;
 	speed = 1000.0f;          // 눈물 속도 (픽셀/초 기준)
-	maxDistance = 600.0f;    // 최대 이동 거리
+	maxDistance = 600.0f + n;    // 최대 이동 거리
 	traveledDistance = 0.0f;
 	isActive = true;         // 꼭 true로 초기화!
 	vx = 0.0f;
@@ -86,3 +86,7 @@ void TEARS::Draw(HDC nhDC) {
 bool TEARS::IsOutOfRange() { // 거리 초과 함수
 	return !isActive;
 };
+
+void TEARS::SetRange(float nrange) {
+	maxDistance += nrange;
+}

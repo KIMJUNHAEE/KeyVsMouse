@@ -27,8 +27,8 @@ bool BoomCheck = FALSE;
 int BoomCount = 0;
 void DrawBoom(HDC nhDC, int x, int y);
 HBITMAP TearsBoomBitMap[15];
-HBITMAP TearoldBitmap = NULL; 
-HDC TearhMemDC = NULL; 
+HBITMAP TearoldBitmap = NULL;
+HDC TearhMemDC = NULL;
 
 // 플레이어 체력 UI 관련 변수
 RECT HeartRect;
@@ -42,6 +42,10 @@ bool isPlayerDead = false;
 bool showLevelUpChoices = false;
 int LevelUpChoices[3]; // 선택지 배열
 char LC[3][100]; // 선택지 텍스트
+
+bool TripleShot = FALSE;
+bool CreateRTLR = FALSE;
+int RTC = 0;
 
 //미니맵 관련 변수
 HDC hMiniMapDC = NULL;
@@ -140,6 +144,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 	static PLAYER1 player(60, 500, 400, 5, 1.0f, 10, 2, 0, down); // 생성자
 	static RoundTear Rt(player.Tx, player.Ty); // 눈물 생성자
+	static RoundTear RTL(0, 0);
+	static RoundTear RTR(0, 0);
+	
+
 
 	static POINT cursor; // 마우스 커서 좌표
 	static float DeltaTime = 16.0f / 1000.0f; // 60fps 기준 1초 재기 위한 단위;
@@ -151,10 +159,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static int seconds;
 	static float DeadTime = 0.0f;
 	static char Timebuf[6];
-	static bool TimeOver = FALSE; 
+	static bool TimeOver = FALSE;
 	static bool isDeadTimerStarted = FALSE;
 	static std::vector<MONSTER> monsters; // 몬스터 벡터 선언
 	static std::vector<TEARS> tears; // 눈물 백터 선언
+	static float MaxRange = 0.0f;
 
 	static int Mtype = 0;
 
@@ -179,7 +188,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		// 눈물 폭발 비트맵 로드
 		TCHAR Tb_filePath[256];
 		for (int i = 0; i < 15; i++) {
-			_stprintf_s(Tb_filePath, _T("P1_graphics/Tb_%d.bmp"), i + 1); 
+			_stprintf_s(Tb_filePath, _T("P1_graphics/Tb_%d.bmp"), i + 1);
 			TearsBoomBitMap[i] = (HBITMAP)LoadImage(NULL, Tb_filePath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 			if (TearsBoomBitMap[i] == NULL) {
 				MessageBox(NULL, _T("비트맵 로딩 실패!"), _T("오류"), MB_OK);
@@ -188,7 +197,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		TearhMemDC = CreateCompatibleDC(NULL);
 		// 배경 이미지 로드
 		TCHAR BGfilepath[256];
-		_stprintf_s(BGfilepath, _T("Play_graphics/background.bmp")); 
+		_stprintf_s(BGfilepath, _T("Play_graphics/background.bmp"));
 		BackGroundhBitmap = (HBITMAP)LoadImage(NULL, BGfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		BGBitDC = CreateCompatibleDC(NULL);
 		if (BackGroundhBitmap == NULL) {
@@ -197,7 +206,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		// 플레이어 사망 이미지 로드
 		TCHAR DIefilepath[256];
-		_stprintf_s(DIefilepath, _T("P1_graphics/DieP.bmp")); 
+		_stprintf_s(DIefilepath, _T("P1_graphics/DieP.bmp"));
 		DieBitmap = (HBITMAP)LoadImage(NULL, DIefilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		if (DieBitmap == NULL) {
 			MessageBox(hWnd, _T("Failed to load DieP image"), _T("Error"), MB_OK | MB_ICONERROR);
@@ -206,7 +215,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		DieBitDC = CreateCompatibleDC(NULL);
 		// Heart 이미지 로드
 		TCHAR Heartfilepath[256];
-		_stprintf_s(Heartfilepath, _T("P1_graphics/ui_hearts.bmp")); 
+		_stprintf_s(Heartfilepath, _T("P1_graphics/ui_hearts.bmp"));
 		HeatBitmap = (HBITMAP)LoadImage(NULL, Heartfilepath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		if (HeatBitmap == NULL) {
 			MessageBox(hWnd, _T("Failed to load ui_hearts image"), _T("Error"), MB_OK | MB_ICONERROR);
@@ -249,6 +258,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		MWinBitMapDC = CreateCompatibleDC(NULL);
 
+		RTL.angle -= 30.0f * (3.1415926f / 180.0f);
+		RTR.angle += 30.0f * (3.1415926f / 180.0f);
+
 		ImageCreate();
 		GetClientRect(hWnd, &ViewRect);
 
@@ -270,7 +282,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			hMiniMapDC = CreateCompatibleDC(hDC);
 			hMiniMapBitmap = CreateCompatibleBitmap(hDC, 200, 200);
 			SelectObject(hMiniMapDC, hMiniMapBitmap);
-			
+
 
 			// 플레이어 그리기
 			if (!isPlayerDead) {
@@ -301,9 +313,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				else if (MoveCheck == 8) {
 					player.RMDraw(hMem2DC, MoveCount);
 				}
+
 				Rt.Update(player.Tx, player.Ty, DeltaTime);
 				Rt.SetRtTearRect();
 				Rt.Draw(hMem2DC);
+				RTL.Update(player.Tx, player.Ty, DeltaTime);
+				RTR.Update(player.Tx, player.Ty, DeltaTime);
+				if (TripleShot) {
+					RTL.SetRtTearRect();
+					RTL.Draw(hMem2DC);
+					RTR.SetRtTearRect();
+					RTR.Draw(hMem2DC);
+				}
 			}
 			else if (isPlayerDead) {
 				HBITMAP DoldBitmap = (HBITMAP)SelectObject(DieBitDC, DieBitmap);
@@ -405,7 +426,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					draw = !draw;
 				}
 			}
-			
+
 			BitBlt(hDC, 0, 0, 1000, 1000, hMem2DC, player.Came.left, player.Came.top, SRCCOPY); // 카메라 영역만 복사
 
 			SelectObject(hMem2DC, hOldBitmap);
@@ -424,7 +445,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 			// 텍스트 출력
 			TextOut(hDC, StartRect.left - 250, StartRect.bottom, _T("Key Vs Mouse"), _tcslen(_T("Key Vs Mouse")));
-			
+
 			HFONT hOldFont2 = (HFONT)SelectObject(hDC, hFont2);
 			Rectangle(hDC, StartRect.left, StartRect.bottom + 200, StartRect.right, StartRect.bottom + 300);
 			TextOut(hDC, StartRect.left + 35, StartRect.bottom + 200, _T("게임 시작"), _tcslen(_T("게임 시작")));
@@ -447,9 +468,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		if (isPlayerDead) {
 			SelectObject(MWinBitMapDC, MWinBitMap);
 			StretchBlt(hDC, StartRect.left, StartRect.top, StartRect.right - StartRect.left, StartRect.bottom - StartRect.top, MWinBitMapDC, 0, 0, 400, 400, SRCCOPY);
-			
+
 		}
-		
+
 
 		EndPaint(hWnd, &ps);
 		break;
@@ -477,7 +498,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		minutes = timeInSeconds / 60; // 분 단위
 		seconds = timeInSeconds % 60; // 초 단위
 
-		if(ElapsedTime >= TimeLimit) { 
+		if (ElapsedTime >= TimeLimit) {
 			if (!isPlayerDead) {
 				TimeOver = TRUE;
 			}
@@ -491,9 +512,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		if (!isPlayerDead) {
 			if (ShootCheck == 1) {
-				TEARS tear(player.Tx, player.Ty);
-				tear.Shoot(Rt.x, Rt.y);
-				tears.push_back(tear);
+				if (!TripleShot) {
+					TEARS tear(player.Tx, player.Ty, MaxRange);
+					tear.Shoot(Rt.x, Rt.y);
+					tears.push_back(tear);
+				}
+				else if(TripleShot) {
+					TEARS tear1(player.Tx, player.Ty, MaxRange);
+					TEARS tear2(player.Tx, player.Ty, MaxRange);
+					TEARS tear3(player.Tx, player.Ty, MaxRange);
+					tear1.Shoot(RTL.x, RTL.y);
+					tears.push_back(tear1);
+					tear2.Shoot(Rt.x, Rt.y);
+					tears.push_back(tear2);
+					tear3.Shoot(RTR.x, RTR.y);
+					tears.push_back(tear3);
+				}
 			}
 
 			// 눈물 이동 및 제거
@@ -611,12 +645,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			// 회전 방향 설정
 			if (H) {
 				Rt.rotationDir = -1; // 반시계 방향
+				RTL.rotationDir = -1;
+				RTR.rotationDir = -1;
 			}
 			else if (J) {
 				Rt.rotationDir = 1; // 시계 방향
+				RTL.rotationDir = 1;
+				RTR.rotationDir = 1;
 			}
 			else {
 				Rt.rotationDir = 0; // 멈춤
+				RTL.rotationDir = 0;
+				RTR.rotationDir = 0;
 			}
 
 			// 애니메이션 프레임 카운트 증가
@@ -637,7 +677,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			showLevelUpChoices = true;
 
 			for (int i = 0; i < 3; i++) {
-				LevelUpChoices[i] = rand() % 3 + 1;
+				LevelUpChoices[i] = rand() % 4 + 1;
 
 				if (LevelUpChoices[i] == 1) {
 					strcpy_s(LC[i], "이동속도 증가");
@@ -653,8 +693,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						strcpy_s(LC[i], "공격속도 증가");
 					}
 				}
+				else if (LevelUpChoices[i] == 4) {
+					strcpy_s(LC[i], "사거리 증가");
+				}
 			}
 			player.LevelUp = false;
+		}
+
+		if (player.Level >= 2) { // 트리플샷 
+			CreateRTLR = TRUE;
+			RTC = 1;
+		}
+		if (CreateRTLR && RTC == 1) {
+			RTC = 0;
+			
+			TripleShot = TRUE;
 		}
 
 		InvalidateRect(hWnd, NULL, FALSE);
@@ -675,6 +728,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						player.Aspeed -= 0.1f;
 					}
 				}
+				else if (LevelUpChoices[0] == 4) { // 4 = 사거리 증가
+					MaxRange += 50.0f;
+				}
 				showLevelUpChoices = false;
 				break;
 			case '2':
@@ -689,6 +745,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 						player.Aspeed -= 0.1f;
 					}
 				}
+				else if (LevelUpChoices[1] == 4) { // 4 = 사거리 증가
+					MaxRange += 50.0f;
+				}
 				showLevelUpChoices = false;
 				break;
 			case '3':
@@ -702,6 +761,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 					if (player.Aspeed > 0.2f) {
 						player.Aspeed -= 0.1f;
 					}
+				}
+				else if (LevelUpChoices[2] == 4) { // 4 = 사거리 증가
+					MaxRange += 50.0f;
 				}
 				showLevelUpChoices = false;
 				break;
@@ -750,7 +812,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				exit(1); // 게임 종료
 			}
 		}
-	
+
 		break;
 	}
 	case WM_LBUTTONUP: {
