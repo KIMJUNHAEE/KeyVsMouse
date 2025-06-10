@@ -429,16 +429,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			shop.DrawShop(hMem2DC, player.Came.left, player.Came.bottom - 210);
 			if (clicked) {
 				if (draw) {
-					if (Mtype == 2) {
-						IMGparabite[3].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
+					POINT temp = { player.Came.left + cursor.x, cursor.y + player.Came.top };
+					if (!PtInRect(&player.HeadRect, temp) && !PtInRect(&player.BodyRect, temp)) {
+						if (Mtype == 2) {
+							IMGparabite[3].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
+						}
+						else if (Mtype == 4) {
+							IMGboomfly[1].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
+						}
+						else if (Mtype == 3) {
+							IMGmom[22].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 128, 174);
+						}
+						draw = !draw;
 					}
-					else if (Mtype == 4) {
-						IMGboomfly[1].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 32, 32);
-					}
-					else if (Mtype == 3) {
-						IMGmom[22].Draw(hMem2DC, player.Came.left + cursor.x, player.Came.top + cursor.y, 32, 32, 0, 0, 128, 174);
-					}
-					draw = !draw;
 				}
 				else {
 					draw = !draw;
@@ -955,13 +958,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		worldY = cursor.y + player.Came.top;
 		if (StartPlay) {
 			if (clicked) {
-				monsters.emplace_back();
-				monsters.back().SetSpot(worldX, worldY);
-				monsters.back().SetRect();
-				monsters.back().SetMonster(Mtype);
+				POINT temp = { player.Came.left + cursor.x, cursor.y + player.Came.top };
+				if (PtInRect(&player.HeadRect, temp) || PtInRect(&player.BodyRect, temp)) {
+				}
+				else {
+					monsters.emplace_back();
+					monsters.back().SetSpot(worldX, worldY);
+					monsters.back().SetRect();
+					monsters.back().SetMonster(Mtype);
+				}
 				clicked = false;
 			}
 		}
+		break;
 	}
 	case WM_MOUSEMOVE:
 		cursor.x = LOWORD(lParam);
